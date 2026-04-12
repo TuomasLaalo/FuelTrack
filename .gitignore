@@ -1,0 +1,22 @@
+# Android / Gradle
+.gradle/
+.gradle-user-home/
+build/
+app/build/
+
+# IDE
+.idea/
+*.iml
+
+# Local machine configuration
+local.properties
+
+# Kotlin tooling
+.kotlin/
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
