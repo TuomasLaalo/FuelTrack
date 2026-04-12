@@ -1,0 +1,193 @@
+package com.laatu.fueltank.feature.trip
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.laatu.fueltank.domain.model.CalculationConfidence
+import com.laatu.fueltank.domain.model.Car
+import com.laatu.fueltank.domain.model.FuelEntry
+import com.laatu.fueltank.domain.model.Trip
+import com.laatu.fueltank.domain.model.TripStatus
+import com.laatu.fueltank.domain.repository.FuelEntryRepository
+import com.laatu.fueltank.domain.repository.TripRepository
+import com.laatu.fueltank.domain.service.CurrentOdometerService
+import com.laatu.fueltank.domain.service.TripSummaryService
+import com.laatu.fueltank.domain.usecase.ObservePrimaryCarUseCase
+import com.laatu.fueltank.domain.usecase.RenameTripUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import java.text.DecimalFormat
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
+class TripSummaryViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    observePrimaryCarUseCase: ObservePrimaryCarUseCase,
+    fuelEntryRepository: FuelEntryRepository,
+    tripRepository: TripRepository,
+    private val currentOdometerService: CurrentOdometerService,
+    private val tripSummaryService: TripSummaryService,
+    private val renameTripUseCase: RenameTripUseCase,
+) : ViewModel() {
+    private val tripId: Long = checkNotNull(savedStateHandle["tripId"])
+
+    val uiState: StateFlow<TripSummaryUiState> = observePrimaryCarUseCase()
+        .flatMapLatest { car ->
+            if (car == null) {
+                flowOf(TripSummaryUiState(title = "Trip not found"))
+            } else {
+                combine(
+                    flowOf(car),
+                    tripRepository.observeTrip(tripId),
+                    fuelEntryRepository.observeEntriesForCar(car.id),
+                    tripRepository.observeTripsForCar(car.id),
+                ) { activeCar, trip, entries, trips ->
+                    if (trip == null) {
+                        TripSummaryUiState(title = "Trip not found")
+                    } else {
+                        trip.toUiState(
+                            car = activeCar,
+                            entries = entries,
+                            trips = trips,
+                            currentOdometerService = currentOdometerService,
+                            tripSummaryService = tripSummaryService,
+                        )
+                    }
+                }
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = TripSummaryUiState(),
+        )
+
+    fun renameTrip(newTitle: String) {
+        viewModelScope.launch {
+            renameTripUseCase(
+                tripId = tripId,
+                title = newTitle,
+            )
+        }
+    }
+}
+
+data class TripSummaryUiState(
+    val title: String = "Trip",
+    val statusLabel: String = "",
+    val statusTone: TripStatusTone = TripStatusTone.Active,
+    val headerSubtitle: String = "",
+    val isActive: Boolean = false,
+    val startDateTimeLabel: String = "Not available",
+    val startLocationLabel: String = "Start location not set",
+    val distanceLabel: String = "0 km",
+    val fuelBoughtLabel: String = "0.0 L",
+    val fuelCostLabel: String = "0.00 EUR",
+    val durationLabel: String = "",
+    val consumptionLabel: String = "Not enough linked refuels yet",
+    val showConsumptionValue: Boolean = false,
+    val consumptionSupportingMessage: String = "",
+    val linkedRefuels: List<TripLinkedRefuelUiModel> = emptyList(),
+)
+
+data class TripLinkedRefuelUiModel(
+    val id: Long,
+    val stationLabel: String,
+    val dateTimeLabel: String,
+    val litersLabel: String,
+    val costLabel: String,
+)
+
+enum class TripStatusTone {
+    Active,
+    Completed,
+}
+
+private fun Trip.toUiState(
+    car: Car,
+    entries: List<FuelEntry>,
+    trips: List<Trip>,
+    currentOdometerService: CurrentOdometerService,
+    tripSummaryService: TripSummaryService,
+): TripSummaryUiState {
+    val linkedEntries = entries.filter { it.tripId == id }.sortedByDescending { it.dateTimeEpochMillis }
+    val currentOdometer = currentOdometerService.resolve(car, entries, trips)
+    val liveEndOdometer = when (status) {
+        TripStatus.ACTIVE -> maxOf(currentOdometer.odometerKm, startOdometerKm)
+        TripStatus.COMPLETED -> endOdometerKm ?: startOdometerKm
+    }
+    val liveTrip = copy(endOdometerKm = liveEndOdometer)
+    val summary = tripSummaryService.buildSummary(
+        trip = liveTrip,
+        linkedEntries = linkedEntries,
+    )
+    val isActiveTrip = status == TripStatus.ACTIVE
+    val startFormatter = DateTimeFormatter.ofPattern("EEE, d MMM • HH:mm").withZone(ZoneId.systemDefault())
+
+    return TripSummaryUiState(
+        title = title ?: if (isActiveTrip) "Active trip" else "Trip",
+        statusLabel = if (isActiveTrip) "Active" else "Completed",
+        statusTone = if (isActiveTrip) TripStatusTone.Active else TripStatusTone.Completed,
+        headerSubtitle = if (isActiveTrip) "" else "Trip summary",
+        isActive = isActiveTrip,
+        startDateTimeLabel = startFormatter.format(Instant.ofEpochMilli(startTimeEpochMillis)),
+        startLocationLabel = startLocation ?: "Start location not set",
+        distanceLabel = "${summary.distanceKm} km",
+        fuelBoughtLabel = decimalFormat.format(summary.fuelBoughtMilliliters / 1000.0) + " L",
+        fuelCostLabel = decimalFormat.format(summary.fuelCostCents / 100.0) + " EUR",
+        durationLabel = buildDurationLabel(
+            startTimeEpochMillis = startTimeEpochMillis,
+            endTimeEpochMillis = endTimeEpochMillis,
+            active = isActiveTrip,
+        ),
+        consumptionLabel = summary.averageConsumptionLitersPer100Km?.let {
+            decimalFormat.format(it) + " L/100 km"
+        } ?: "Not enough linked refuels yet",
+        showConsumptionValue = summary.averageConsumptionLitersPer100Km != null,
+        consumptionSupportingMessage = when (summary.confidence) {
+            CalculationConfidence.LOW_CONFIDENCE -> "Based on fuel purchases linked to this trip."
+            CalculationConfidence.HIGH_CONFIDENCE -> "Based on reliable trip-linked refuels."
+            CalculationConfidence.NOT_AVAILABLE -> "Add linked refuels to build a trip consumption view."
+        },
+        linkedRefuels = linkedEntries.map { entry ->
+            TripLinkedRefuelUiModel(
+                id = entry.id,
+                stationLabel = entry.stationBrand?.ifBlank { null } ?: "Station not set",
+                dateTimeLabel = refuelDateFormatter.format(Instant.ofEpochMilli(entry.dateTimeEpochMillis)),
+                litersLabel = decimalFormat.format(entry.litersMilliliters / 1000.0) + " L",
+                costLabel = decimalFormat.format(entry.totalCostCents / 100.0) + " EUR",
+            )
+        },
+    )
+}
+
+private fun buildDurationLabel(
+    startTimeEpochMillis: Long,
+    endTimeEpochMillis: Long?,
+    active: Boolean,
+): String {
+    val end = endTimeEpochMillis ?: System.currentTimeMillis()
+    val duration = Duration.ofMillis((end - startTimeEpochMillis).coerceAtLeast(0L))
+    val hours = duration.toHours()
+    val minutes = duration.minusHours(hours).toMinutes()
+    val base = when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        else -> "${minutes}m"
+    }
+    return if (active) "Running for $base" else "Duration $base"
+}
+
+private val decimalFormat = DecimalFormat("0.0#")
+private val refuelDateFormatter = DateTimeFormatter.ofPattern("d MMM • HH:mm").withZone(ZoneId.systemDefault())
