@@ -50,19 +50,25 @@ class FuelEntryMutationPlannerTest {
         ).inOrder()
     }
 
-    @Test(expected = FuelEntryMutationException::class)
-    fun planUpdate_throwsWhenLaterManualOdometerWouldMoveBackwards() {
+    @Test
+    fun planUpdate_throwsTypedErrorWhenLaterManualOdometerWouldMoveBackwards() {
         val entries = listOf(
             entry(id = 1, dateTimeEpochMillis = 1, distanceInputMode = DistanceInputMode.ODOMETER, odometerKm = 10_100),
             entry(id = 2, dateTimeEpochMillis = 2, distanceInputMode = DistanceInputMode.TRIP_METER, odometerKm = 10_200, tripMeterKm = 100),
             entry(id = 3, dateTimeEpochMillis = 3, distanceInputMode = DistanceInputMode.ODOMETER, odometerKm = 10_250),
         )
 
-        planner.planUpdate(
-            initialOdometerKm = 10_000,
-            existingEntries = entries,
-            updatedEntry = entries.first().copy(odometerKm = 10_220),
-        )
+        val error = runCatching {
+            planner.planUpdate(
+                initialOdometerKm = 10_000,
+                existingEntries = entries,
+                updatedEntry = entries.first().copy(odometerKm = 10_220),
+            )
+        }.exceptionOrNull()
+
+        assertThat(error).isInstanceOf(FuelEntryMutationException::class.java)
+        assertThat((error as FuelEntryMutationException).error)
+            .isEqualTo(FuelEntryMutationError.ODOMETER_MOVES_BACKWARDS)
     }
 
     private fun entry(

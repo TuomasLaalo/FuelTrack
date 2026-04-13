@@ -3,8 +3,11 @@ package com.laatu.fueltank.feature.fuelentry
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.localization.StringResourceProvider
 import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
+import com.laatu.fueltank.domain.service.FuelEntryMutationError
 import com.laatu.fueltank.domain.service.FuelEntryMutationException
 import com.laatu.fueltank.domain.usecase.ObservePrimaryCarUseCase
 import com.laatu.fueltank.domain.usecase.UpdateFuelEntryUseCase
@@ -34,6 +37,7 @@ class EditFuelEntryViewModel @Inject constructor(
     observePrimaryCarUseCase: ObservePrimaryCarUseCase,
     fuelEntryRepository: FuelEntryRepository,
     private val updateFuelEntryUseCase: UpdateFuelEntryUseCase,
+    private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
     private val entryId: Long = checkNotNull(savedStateHandle["entryId"])
     private val formState = MutableStateFlow(AddFuelEntryFormState())
@@ -46,7 +50,7 @@ class EditFuelEntryViewModel @Inject constructor(
                     EditFuelEntryUiState(
                         formUiState = AddFuelEntryUiState(
                             form = form,
-                            computedTotalPriceLabel = form.toComputedTotalPriceLabel(),
+                            computedTotalPriceLabel = form.toComputedTotalPriceLabel(stringResourceProvider),
                         ),
                     )
                 }
@@ -77,7 +81,7 @@ class EditFuelEntryViewModel @Inject constructor(
                             carId = car.id,
                             baselineOdometerKm = baseline,
                             form = effectiveForm,
-                            computedTotalPriceLabel = effectiveForm.toComputedTotalPriceLabel(),
+                            computedTotalPriceLabel = effectiveForm.toComputedTotalPriceLabel(stringResourceProvider),
                         ),
                         canEdit = target != null,
                     )
@@ -132,7 +136,12 @@ class EditFuelEntryViewModel @Inject constructor(
                         )
                         events.send(EditFuelEntryEvent.EntryUpdated)
                     } catch (error: FuelEntryMutationException) {
-                        formState.updateField { copy(isSaving = false, generalError = error.message) }
+                        formState.updateField {
+                            copy(
+                                isSaving = false,
+                                generalError = error.toUiMessage(stringResourceProvider),
+                            )
+                        }
                     }
                 }
             }
@@ -149,15 +158,19 @@ class EditFuelEntryViewModel @Inject constructor(
             isSaving = false,
         )
         val liters = form.liters.parseLocalizedDecimal()
-        if (liters == null || liters <= 0.0) form = form.copy(litersError = "Enter fuel amount")
+        if (liters == null || liters <= 0.0) {
+            form = form.copy(litersError = stringResourceProvider.get(R.string.fuel_entry_error_fuel_amount))
+        }
         val pricePerLiter = form.pricePerLiter.parseLocalizedDecimal()
-        if (pricePerLiter == null || pricePerLiter <= 0.0) form = form.copy(pricePerLiterError = "Enter price per liter")
+        if (pricePerLiter == null || pricePerLiter <= 0.0) {
+            form = form.copy(pricePerLiterError = stringResourceProvider.get(R.string.fuel_entry_error_price_per_unit))
+        }
 
         val odometerKm = when (form.distanceInputMode) {
             DistanceInputMode.ODOMETER -> {
                 val value = form.odometerKm.toLongOrNull()
                 if (value == null || value < 0) {
-                    form = form.copy(odometerError = "Enter current odometer")
+                    form = form.copy(odometerError = stringResourceProvider.get(R.string.fuel_entry_error_current_odometer))
                     null
                 } else {
                     value
@@ -168,11 +181,11 @@ class EditFuelEntryViewModel @Inject constructor(
                 val tripMeterValue = form.tripMeterKm.toLongOrNull()
                 when {
                     baseline == null -> {
-                        form = form.copy(generalError = "Trip meter mode needs a known odometer baseline")
+                        form = form.copy(generalError = stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_baseline))
                         null
                     }
                     tripMeterValue == null || tripMeterValue < 0 -> {
-                        form = form.copy(tripMeterError = "Enter trip meter distance")
+                        form = form.copy(tripMeterError = stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_distance))
                         null
                     }
                     else -> baseline + tripMeterValue
@@ -237,3 +250,12 @@ private fun List<com.laatu.fueltank.domain.model.FuelEntry>.sortedChronologicall
         .thenBy { it.createdAtEpochMillis }
         .thenBy { it.id }
 )
+
+private fun FuelEntryMutationException.toUiMessage(
+    stringResourceProvider: StringResourceProvider,
+): String = when (error) {
+    FuelEntryMutationError.ENTRY_NOT_FOUND -> stringResourceProvider.get(R.string.fuel_entry_error_entry_not_found)
+    FuelEntryMutationError.ODOMETER_MOVES_BACKWARDS -> stringResourceProvider.get(R.string.fuel_entry_error_odometer_backwards)
+    FuelEntryMutationError.TRIP_METER_DISTANCE_MISSING -> stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_missing_distance)
+    FuelEntryMutationError.TRIP_METER_DISTANCE_NEGATIVE -> stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_negative_distance)
+}

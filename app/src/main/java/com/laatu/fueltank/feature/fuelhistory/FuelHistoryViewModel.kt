@@ -7,6 +7,7 @@ import com.laatu.fueltank.core.localization.StringResourceProvider
 import com.laatu.fueltank.domain.model.CalculationConfidence
 import com.laatu.fueltank.domain.model.FuelEntry
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
+import com.laatu.fueltank.domain.service.FuelEntryMutationError
 import com.laatu.fueltank.domain.service.FuelEntryMutationException
 import com.laatu.fueltank.domain.usecase.BuildDashboardStatsUseCase
 import com.laatu.fueltank.domain.usecase.DeleteFuelEntryUseCase
@@ -107,7 +108,7 @@ class FuelHistoryViewModel @Inject constructor(
             try {
                 deleteFuelEntryUseCase(entryId)
             } catch (error: FuelEntryMutationException) {
-                errorMessage.value = error.message
+                errorMessage.value = error.toUiMessage(stringResourceProvider)
             }
             pendingDeleteId.value = null
         }
@@ -233,3 +234,12 @@ private val euroFormat = DecimalFormat("0.00")
 private fun Long.toEuroString(): String = euroFormat.format(this / 100.0) + " €"
 
 private fun Long.toEuroPerUnitString(): String = euroFormat.format(this / 1_000_000.0) + " €"
+
+private fun FuelEntryMutationException.toUiMessage(
+    stringResourceProvider: StringResourceProvider,
+): String = when (error) {
+    FuelEntryMutationError.ENTRY_NOT_FOUND -> stringResourceProvider.get(R.string.fuel_entry_error_entry_not_found)
+    FuelEntryMutationError.ODOMETER_MOVES_BACKWARDS -> stringResourceProvider.get(R.string.fuel_entry_error_odometer_backwards)
+    FuelEntryMutationError.TRIP_METER_DISTANCE_MISSING -> stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_missing_distance)
+    FuelEntryMutationError.TRIP_METER_DISTANCE_NEGATIVE -> stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_negative_distance)
+}

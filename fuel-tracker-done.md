@@ -45,3 +45,6 @@ Use this file to track completed work. Move items here from the backlog when the
 - Completed the second localization slice for Fuel History and Trips, including headers, cards, menus, dialogs, empty states, and ViewModel-owned date/status formatting
 - Cleaned older euro/date formatting in Fuel History so localized screens no longer depend on broken encoded symbols in UI output
 - Verified the second localization checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+- Replaced raw fuel-entry mutation exception strings with typed domain errors and mapped them to localized UI messages in edit/delete flows
+- Localized the remaining Edit Fuel Entry validation messages so add/edit form behavior now uses the same resource-backed error text path
+- Added a unit assertion for typed odometer-backwards mutation errors and re-verified the checkpoint with successful `assembleDebug` and `testDebugUnitTest`

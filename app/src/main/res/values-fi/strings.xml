@@ -72,6 +72,10 @@
     <string name="fuel_entry_error_current_odometer">Syötä nykyinen odometrilukema</string>
     <string name="fuel_entry_error_trip_meter_baseline">Matkamittaritila tarvitsee tunnetun odometrin peruslukeman</string>
     <string name="fuel_entry_error_trip_meter_distance">Syötä matkamittarin etäisyys</string>
+    <string name="fuel_entry_error_entry_not_found">Tankkausmerkintää ei löytynyt.</string>
+    <string name="fuel_entry_error_odometer_backwards">Tämä muutos siirtäisi odometrin taaksepäin aiempiin merkintöihin nähden.</string>
+    <string name="fuel_entry_error_trip_meter_missing_distance">Matkamittarimerkinnästä puuttuu etäisyys.</string>
+    <string name="fuel_entry_error_trip_meter_negative_distance">Matkamittarin etäisyys ei voi olla negatiivinen.</string>
     <string name="common_back">Takaisin</string>
     <string name="common_cancel">Peruuta</string>
     <string name="common_delete">Poista</string>

@@ -15,7 +15,7 @@ class FuelEntryMutationPlanner @Inject constructor() {
         }
 
         if (replacedEntries.none { it.id == updatedEntry.id }) {
-            throw FuelEntryMutationException("Fuel entry was not found.")
+            throw FuelEntryMutationException(FuelEntryMutationError.ENTRY_NOT_FOUND)
         }
 
         return FuelEntryMutationPlan(
@@ -33,7 +33,7 @@ class FuelEntryMutationPlanner @Inject constructor() {
     ): FuelEntryMutationPlan {
         val remainingEntries = existingEntries.filterNot { it.id == deletedEntryId }
         if (remainingEntries.size == existingEntries.size) {
-            throw FuelEntryMutationException("Fuel entry was not found.")
+            throw FuelEntryMutationException(FuelEntryMutationError.ENTRY_NOT_FOUND)
         }
 
         return FuelEntryMutationPlan(
@@ -60,17 +60,16 @@ class FuelEntryMutationPlanner @Inject constructor() {
             val normalizedOdometerKm = when (entry.distanceInputMode) {
                 DistanceInputMode.ODOMETER -> {
                     if (entry.odometerKm < previousOdometerKm) {
-                        throw FuelEntryMutationException(
-                            "Odometer cannot move backwards relative to earlier entries.",
-                        )
+                        throw FuelEntryMutationException(FuelEntryMutationError.ODOMETER_MOVES_BACKWARDS)
                     }
                     entry.odometerKm
                 }
+
                 DistanceInputMode.TRIP_METER -> {
                     val tripMeterKm = entry.tripMeterKm
-                        ?: throw FuelEntryMutationException("Trip meter entry is missing its distance.")
+                        ?: throw FuelEntryMutationException(FuelEntryMutationError.TRIP_METER_DISTANCE_MISSING)
                     if (tripMeterKm < 0) {
-                        throw FuelEntryMutationException("Trip meter distance cannot be negative.")
+                        throw FuelEntryMutationException(FuelEntryMutationError.TRIP_METER_DISTANCE_NEGATIVE)
                     }
                     previousOdometerKm + tripMeterKm
                 }
@@ -87,6 +86,13 @@ data class FuelEntryMutationPlan(
     val deleteEntryIds: List<Long> = emptyList(),
 )
 
+enum class FuelEntryMutationError {
+    ENTRY_NOT_FOUND,
+    ODOMETER_MOVES_BACKWARDS,
+    TRIP_METER_DISTANCE_MISSING,
+    TRIP_METER_DISTANCE_NEGATIVE,
+}
+
 class FuelEntryMutationException(
-    override val message: String,
-) : IllegalStateException(message)
+    val error: FuelEntryMutationError,
+) : IllegalStateException(error.name)

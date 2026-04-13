@@ -72,6 +72,10 @@
     <string name="fuel_entry_error_current_odometer">Enter current odometer</string>
     <string name="fuel_entry_error_trip_meter_baseline">Trip meter mode needs a known odometer baseline</string>
     <string name="fuel_entry_error_trip_meter_distance">Enter trip meter distance</string>
+    <string name="fuel_entry_error_entry_not_found">Fuel entry was not found.</string>
+    <string name="fuel_entry_error_odometer_backwards">This change would make the odometer move backwards relative to earlier entries.</string>
+    <string name="fuel_entry_error_trip_meter_missing_distance">Trip meter entry is missing its distance.</string>
+    <string name="fuel_entry_error_trip_meter_negative_distance">Trip meter distance cannot be negative.</string>
     <string name="common_back">Back</string>
     <string name="common_cancel">Cancel</string>
     <string name="common_delete">Delete</string>
