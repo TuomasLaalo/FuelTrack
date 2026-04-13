@@ -38,6 +38,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
 
@@ -130,7 +132,7 @@ private fun DashboardScreen(
             )
         }
         item {
-            SectionTitle(text = "Quick Stats")
+            SectionTitle(text = stringResource(R.string.dashboard_quick_stats))
         }
         item {
             Row(
@@ -139,13 +141,13 @@ private fun DashboardScreen(
             ) {
                 QuickStatCard(
                     icon = Icons.Outlined.Euro,
-                    label = "Monthly Spending",
+                    label = stringResource(R.string.dashboard_monthly_spending),
                     value = uiState.totalFuelCostLabel,
                     modifier = Modifier.weight(1f),
                 )
                 QuickStatCard(
                     icon = Icons.Outlined.Place,
-                    label = "Distance Covered",
+                    label = stringResource(R.string.dashboard_distance_covered),
                     value = uiState.totalDistanceLabel,
                     modifier = Modifier.weight(1f),
                 )
@@ -157,7 +159,7 @@ private fun DashboardScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                SectionTitle(text = "Latest Refuel")
+                SectionTitle(text = stringResource(R.string.dashboard_latest_refuel))
                 TextButton(
                     onClick = onHistoryClick,
                     modifier = Modifier.background(
@@ -166,7 +168,7 @@ private fun DashboardScreen(
                     ),
                 ) {
                     Text(
-                        text = "View all",
+                        text = stringResource(R.string.dashboard_view_all),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
@@ -178,15 +180,15 @@ private fun DashboardScreen(
             uiState.latestRefuel?.let {
                 RefuelSummaryCard(entry = it)
             } ?: CompareFuelPricesCard(
-                title = "No refuels yet",
-                body = "Add the first fuel entry to start building a calmer, more reliable overview of your costs.",
+                title = stringResource(R.string.dashboard_no_refuels_yet),
+                body = stringResource(R.string.dashboard_no_refuels_body),
             )
         }
         uiState.utilityCard?.let {
             item {
                 CompareFuelPricesCard(
-                    title = "Compare fuel prices",
-                    body = "Explore stations and fuel prices nearby.",
+                    title = stringResource(R.string.dashboard_compare_fuel_prices),
+                    body = stringResource(R.string.dashboard_compare_fuel_prices_body),
                 )
             }
         }
@@ -217,7 +219,7 @@ private fun FuelTrackHeader(
                     tint = MaterialTheme.colorScheme.primary,
                 )
                 Text(
-                    text = "FuelTrack",
+                    text = stringResource(R.string.dashboard_brand),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
@@ -241,7 +243,7 @@ private fun FuelTrackHeader(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Add,
-                        contentDescription = "Add refill",
+                        contentDescription = stringResource(R.string.dashboard_add_refill),
                         tint = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
@@ -249,7 +251,7 @@ private fun FuelTrackHeader(
         }
         if (activeTrip != null) {
             Text(
-                text = "Active trip: ${activeTrip.title}",
+                text = stringResource(R.string.dashboard_active_trip_title, activeTrip.title),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
@@ -268,7 +270,7 @@ private fun FuelTrackHeader(
                 ),
             ) {
                 Text(
-                    text = "All trips",
+                    text = stringResource(R.string.dashboard_all_trips),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
@@ -301,7 +303,11 @@ private fun TripHeaderActionButton(
         ) {
             Icon(
                 imageVector = if (isActive) Icons.Outlined.Route else Icons.Outlined.AddRoad,
-                contentDescription = if (isActive) "Open active trip" else "Start Trip",
+                contentDescription = if (isActive) {
+                    stringResource(R.string.dashboard_trip_button_open_active)
+                } else {
+                    stringResource(R.string.dashboard_trip_button_start)
+                },
                 modifier = Modifier.size(if (isActive) 21.dp else 24.dp),
             )
         }
@@ -331,13 +337,13 @@ private fun VehicleContextBlock(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(
-            text = "Active Vehicle",
+            text = stringResource(R.string.dashboard_active_vehicle),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Bold,
         )
         Text(
-            text = if (carName.isBlank()) "FuelTrack vehicle" else carName,
+            text = if (carName.isBlank()) stringResource(R.string.dashboard_default_vehicle_name) else carName,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -369,7 +375,7 @@ private fun HeroMetricCard(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = "Average Consumption",
+                text = stringResource(R.string.dashboard_average_consumption),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.9f),
                 fontWeight = FontWeight.SemiBold,
@@ -515,11 +521,11 @@ private fun RefuelSummaryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 RefuelMetaBlock(
-                    label = "QUANTITY",
+                    label = stringResource(R.string.dashboard_quantity),
                     value = entry.litersLabel,
                 )
                 RefuelMetaBlock(
-                    label = "PRICE / UNIT",
+                    label = stringResource(R.string.dashboard_price_per_unit),
                     value = entry.pricePerLiterLabel,
                     alignEnd = true,
                 )

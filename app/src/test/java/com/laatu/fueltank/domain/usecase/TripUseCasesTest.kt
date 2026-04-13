@@ -167,6 +167,11 @@ private class FakeTripRepository(
             trip.id
         }
     }
+
+    override suspend fun deleteTrip(tripId: Long) {
+        trips.removeAll { it.id == tripId }
+        state.value = trips.toList()
+    }
 }
 
 private fun testCar() = Car(

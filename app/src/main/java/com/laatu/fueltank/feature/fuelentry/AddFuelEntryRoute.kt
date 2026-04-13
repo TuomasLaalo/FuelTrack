@@ -14,9 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 
 @Composable
@@ -56,10 +58,10 @@ fun AddFuelEntryRoute(
         ) {
             FuelEntryFormContent(
                 uiState = uiState,
-                title = "Add Fuel Entry",
-                subtitle = "Log your latest refuel details",
-                saveLabel = "Save Entry",
-                discardLabel = "Discard",
+                title = stringResource(R.string.fuel_entry_title_add),
+                subtitle = stringResource(R.string.fuel_entry_subtitle_add),
+                saveLabel = stringResource(R.string.fuel_entry_save),
+                discardLabel = stringResource(R.string.fuel_entry_discard),
                 modifier = Modifier.padding(top = 12.dp),
                 showTripAttachment = true,
                 onDistanceModeChange = viewModel::onDistanceModeChange,
@@ -81,10 +83,10 @@ fun AddFuelEntryRoute(
 
     if (uiState.showDiscardDialog) {
         ConfirmationDialog(
-            title = "Discard refuel entry?",
-            message = "Your current input will be lost.",
-            confirmLabel = "Discard",
-            dismissLabel = "Keep editing",
+            title = stringResource(R.string.fuel_entry_discard_title),
+            message = stringResource(R.string.fuel_entry_discard_message),
+            confirmLabel = stringResource(R.string.fuel_entry_discard),
+            dismissLabel = stringResource(R.string.fuel_entry_keep_editing),
             onConfirm = viewModel::confirmDiscard,
             onDismiss = viewModel::dismissDiscardDialog,
         )

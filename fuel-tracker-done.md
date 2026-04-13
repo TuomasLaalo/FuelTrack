@@ -34,3 +34,11 @@ Use this file to track completed work. Move items here from the backlog when the
 - Added trip-focused unit tests for trip summary semantics and trip start/end use cases
 - Polished the main UI flows, especially dashboard and trip screens, with stronger information hierarchy, reusable info cards, clearer active-trip presentation, and improved summary/readability states
 - Verified current app state with successful `assembleDebug` and `testDebugUnitTest`
+
+### 2026-04-13
+
+- Added a localization implementation plan for the app and completed the first localization slice for Dashboard and Add Fuel Entry
+- Moved visible Dashboard and Add Fuel Entry text into `strings.xml` and `values-fi/strings.xml`, including Compose labels, dialog copy, and Add Fuel Entry validation messages
+- Added a small `StringResourceProvider` to localize ViewModel-owned fallback and formatted text cleanly without pushing resource lookups into ad hoc code paths
+- Fixed the stale `TripUseCasesTest` fake repository so the unit test suite matches the current `TripRepository` interface
+- Verified the checkpoint with successful `assembleDebug` and `testDebugUnitTest`

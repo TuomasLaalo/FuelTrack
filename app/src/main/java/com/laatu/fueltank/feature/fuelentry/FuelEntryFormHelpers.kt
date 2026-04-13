@@ -1,5 +1,7 @@
 package com.laatu.fueltank.feature.fuelentry
 
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.localization.StringResourceProvider
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -13,7 +15,9 @@ internal fun MutableStateFlow<AddFuelEntryFormState>.updateField(
     update { current -> current.transform() }
 }
 
-internal fun AddFuelEntryFormState.toComputedTotalPriceLabel(): String {
+internal fun AddFuelEntryFormState.toComputedTotalPriceLabel(
+    stringResourceProvider: StringResourceProvider,
+): String {
     val liters = liters.parseLocalizedDecimal()
     val pricePerLiter = pricePerLiter.parseLocalizedDecimal()
     val total = if (liters != null && pricePerLiter != null && liters >= 0.0 && pricePerLiter >= 0.0) {
@@ -21,8 +25,11 @@ internal fun AddFuelEntryFormState.toComputedTotalPriceLabel(): String {
     } else {
         0.0
     }
-    return "${moneyFormatter.format(total)} EUR"
+    return stringResourceProvider.get(R.string.unit_euro_symbol, moneyFormatter.format(total))
 }
+
+internal fun AddFuelEntryFormState.toComputedTotalPriceLabel(): String =
+    "${moneyFormatter.format((liters.parseLocalizedDecimal() ?: 0.0) * (pricePerLiter.parseLocalizedDecimal() ?: 0.0))} €"
 
 internal fun Double.toCents(): Long = (this * 100).roundToLong()
 

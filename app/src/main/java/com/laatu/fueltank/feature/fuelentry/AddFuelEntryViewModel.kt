@@ -2,6 +2,8 @@ package com.laatu.fueltank.feature.fuelentry
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.localization.StringResourceProvider
 import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.domain.model.TripStatus
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
@@ -33,6 +35,7 @@ class AddFuelEntryViewModel @Inject constructor(
     tripRepository: TripRepository,
     private val currentOdometerService: CurrentOdometerService,
     private val createFuelEntryUseCase: CreateFuelEntryUseCase,
+    private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
     private val formState = MutableStateFlow(AddFuelEntryFormState())
     private val showDiscardDialog = MutableStateFlow(false)
@@ -45,7 +48,7 @@ class AddFuelEntryViewModel @Inject constructor(
                         carId = null,
                         baselineOdometerKm = baseline,
                         form = form,
-                        computedTotalPriceLabel = form.toComputedTotalPriceLabel(),
+                        computedTotalPriceLabel = form.toComputedTotalPriceLabel(stringResourceProvider),
                         showDiscardDialog = discardDialogVisible,
                     )
                 }
@@ -68,7 +71,7 @@ class AddFuelEntryViewModel @Inject constructor(
                         activeTripId = activeTrip?.id,
                         activeTripLabel = activeTrip?.title ?: activeTrip?.startLocation,
                         form = form,
-                        computedTotalPriceLabel = form.toComputedTotalPriceLabel(),
+                        computedTotalPriceLabel = form.toComputedTotalPriceLabel(stringResourceProvider),
                         showDiscardDialog = discardDialogVisible,
                     )
                 }
@@ -129,7 +132,7 @@ class AddFuelEntryViewModel @Inject constructor(
     fun submit() {
         val state = uiState.value
         val carId = state.carId ?: run {
-            formState.updateField { copy(generalError = "Create a car first") }
+            formState.updateField { copy(generalError = stringResourceProvider.get(R.string.fuel_entry_error_create_car_first)) }
             return
         }
 
@@ -171,19 +174,19 @@ class AddFuelEntryViewModel @Inject constructor(
 
         val liters = form.liters.parseLocalizedDecimal()
         if (liters == null || liters <= 0.0) {
-            form = form.copy(litersError = "Enter fuel amount")
+            form = form.copy(litersError = stringResourceProvider.get(R.string.fuel_entry_error_fuel_amount))
         }
 
         val pricePerLiter = form.pricePerLiter.parseLocalizedDecimal()
         if (pricePerLiter == null || pricePerLiter <= 0.0) {
-            form = form.copy(pricePerLiterError = "Enter price per liter")
+            form = form.copy(pricePerLiterError = stringResourceProvider.get(R.string.fuel_entry_error_price_per_unit))
         }
 
         val odometerKm = when (form.distanceInputMode) {
             DistanceInputMode.ODOMETER -> {
                 val value = form.odometerKm.toLongOrNull()
                 if (value == null || value < 0) {
-                    form = form.copy(odometerError = "Enter current odometer")
+                    form = form.copy(odometerError = stringResourceProvider.get(R.string.fuel_entry_error_current_odometer))
                     null
                 } else {
                     value
@@ -194,11 +197,11 @@ class AddFuelEntryViewModel @Inject constructor(
                 val tripMeterValue = form.tripMeterKm.toLongOrNull()
                 when {
                     baseline == null -> {
-                        form = form.copy(generalError = "Trip meter mode needs a known odometer baseline")
+                        form = form.copy(generalError = stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_baseline))
                         null
                     }
                     tripMeterValue == null || tripMeterValue < 0 -> {
-                        form = form.copy(tripMeterError = "Enter trip meter distance")
+                        form = form.copy(tripMeterError = stringResourceProvider.get(R.string.fuel_entry_error_trip_meter_distance))
                         null
                     }
                     else -> baseline + tripMeterValue
@@ -230,7 +233,7 @@ data class AddFuelEntryUiState(
     val activeTripId: Long? = null,
     val activeTripLabel: String? = null,
     val form: AddFuelEntryFormState = AddFuelEntryFormState(),
-    val computedTotalPriceLabel: String = "0.00 EUR",
+    val computedTotalPriceLabel: String = "0.00 €",
     val showDiscardDialog: Boolean = false,
 )
 

@@ -38,9 +38,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.ui.theme.Forest
@@ -121,8 +123,8 @@ fun FuelEntryFormContent(
                 FormField(
                     value = uiState.form.tripMeterKm,
                     onValueChange = onTripMeterChange,
-                    label = "Trip meter (km)",
-                    placeholder = "0 km since last refuel",
+                    label = stringResource(R.string.fuel_entry_trip_meter_km),
+                    placeholder = stringResource(R.string.fuel_entry_trip_meter_placeholder),
                     filled = true,
                     isError = uiState.form.tripMeterError != null,
                     filledContainerColor = modalSurfaceColorAlt,
@@ -137,7 +139,7 @@ fun FuelEntryFormContent(
                 if (uiState.form.tripMeterError == null) {
                     uiState.baselineOdometerKm?.let { baseline ->
                         Text(
-                            text = "Baseline odometer: $baseline km",
+                            text = stringResource(R.string.fuel_entry_baseline_odometer, baseline),
                             style = MaterialTheme.typography.bodySmall,
                             color = modalMutedText,
                             modifier = Modifier.padding(start = 4.dp),
@@ -148,8 +150,8 @@ fun FuelEntryFormContent(
                 FormField(
                     value = uiState.form.odometerKm,
                     onValueChange = onOdometerChange,
-                    label = "Odometer (km)",
-                    placeholder = "Current odometer reading",
+                    label = stringResource(R.string.fuel_entry_odometer_km),
+                    placeholder = stringResource(R.string.fuel_entry_odometer_placeholder),
                     filled = true,
                     isError = uiState.form.odometerError != null,
                     filledContainerColor = modalSurfaceColorAlt,
@@ -181,8 +183,8 @@ fun FuelEntryFormContent(
             FormField(
                 value = uiState.form.stationBrand,
                 onValueChange = onStationBrandChange,
-                label = "Station",
-                placeholder = "Shell, ABC, Neste...",
+                label = stringResource(R.string.fuel_entry_station),
+                placeholder = stringResource(R.string.fuel_entry_station_placeholder),
                 filled = true,
                 filledContainerColor = modalSurfaceColorAlt,
                 filledTextColor = modalPrimaryText,
@@ -194,7 +196,7 @@ fun FuelEntryFormContent(
 
             InlineSwitchRow(
                 modalStyle = modalStyle,
-                title = "Full tank refill",
+                title = stringResource(R.string.fuel_entry_full_tank_refill),
                 checked = uiState.form.isFullTank,
                 onCheckedChange = onFullTankChange,
             )
@@ -203,7 +205,9 @@ fun FuelEntryFormContent(
                 InlineSwitchRow(
                     modalStyle = modalStyle,
                     icon = Icons.Outlined.Route,
-                    title = uiState.activeTripLabel?.let { "Attach to active trip: $it" } ?: "Attach to active trip",
+                    title = uiState.activeTripLabel?.let {
+                        stringResource(R.string.fuel_entry_attach_active_trip_named, it)
+                    } ?: stringResource(R.string.fuel_entry_attach_active_trip),
                     checked = uiState.form.attachToActiveTrip,
                     onCheckedChange = onAttachToActiveTripChange,
                 )
@@ -224,7 +228,11 @@ fun FuelEntryFormContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = if (uiState.form.note.isBlank()) "Add note" else "Edit note",
+                        text = if (uiState.form.note.isBlank()) {
+                            stringResource(R.string.fuel_entry_add_note)
+                        } else {
+                            stringResource(R.string.fuel_entry_edit_note)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = modalSecondaryText,
                         fontWeight = FontWeight.Medium,
@@ -242,9 +250,9 @@ fun FuelEntryFormContent(
                 FormField(
                     value = uiState.form.note,
                     onValueChange = onNoteChange,
-                    label = "Note",
+                    label = stringResource(R.string.fuel_entry_note),
                     singleLine = false,
-                    placeholder = "Optional note",
+                    placeholder = stringResource(R.string.fuel_entry_note_placeholder),
                     filled = true,
                     filledContainerColor = modalSurfaceColorAlt,
                     filledTextColor = modalPrimaryText,
@@ -256,7 +264,7 @@ fun FuelEntryFormContent(
             }
 
             GradientPrimaryButton(
-                text = if (uiState.form.isSaving) "Saving..." else saveLabel,
+                text = if (uiState.form.isSaving) stringResource(R.string.fuel_entry_saving) else saveLabel,
                 enabled = !uiState.form.isSaving,
                 onClick = onSaveClick,
             )
@@ -306,7 +314,11 @@ private fun FuelEntryHeader(
         }
         if (onCancelClick != null) {
             Text(
-                text = if (showCancelText) "Cancel" else "Close",
+                text = if (showCancelText) {
+                    stringResource(R.string.fuel_entry_cancel)
+                } else {
+                    stringResource(R.string.fuel_entry_close)
+                },
                 style = MaterialTheme.typography.labelLarge,
                 color = secondaryText,
                 fontWeight = FontWeight.SemiBold,
@@ -330,7 +342,7 @@ private fun DistanceModeToggle(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            text = "Distance",
+            text = stringResource(R.string.fuel_entry_distance),
             style = MaterialTheme.typography.bodySmall,
             color = secondaryText,
             fontWeight = FontWeight.Medium,
@@ -344,14 +356,14 @@ private fun DistanceModeToggle(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 SegmentedModeOption(
-                    text = "Trip meter",
+                    text = stringResource(R.string.fuel_entry_trip_meter),
                     selected = selectedMode == DistanceInputMode.TRIP_METER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     onClick = { onModeChange(DistanceInputMode.TRIP_METER) },
                 )
                 SegmentedModeOption(
-                    text = "Odometer",
+                    text = stringResource(R.string.fuel_entry_odometer),
                     selected = selectedMode == DistanceInputMode.ODOMETER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
@@ -415,7 +427,7 @@ private fun CompactPurchaseCard(
             FormField(
                 value = pricePerUnit,
                 onValueChange = onPricePerUnitChange,
-                label = "Price / Unit",
+                label = stringResource(R.string.fuel_entry_price_per_unit),
                 placeholder = "1.85",
                 modifier = Modifier.weight(1f),
                 filled = true,
@@ -432,7 +444,7 @@ private fun CompactPurchaseCard(
             FormField(
                 value = quantity,
                 onValueChange = onQuantityChange,
-                label = "Quantity",
+                label = stringResource(R.string.fuel_entry_quantity),
                 placeholder = "42.5",
                 modifier = Modifier.weight(1f),
                 filled = true,
@@ -456,7 +468,7 @@ private fun CompactPurchaseCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Total price",
+                    text = stringResource(R.string.fuel_entry_total_price),
                     style = MaterialTheme.typography.bodySmall,
                     color = secondaryText,
                     fontWeight = FontWeight.Medium,
