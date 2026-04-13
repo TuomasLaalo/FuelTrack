@@ -11,4 +11,5 @@ interface TripRepository {
     suspend fun getActiveTripForCar(carId: Long): Trip?
     suspend fun getTrip(tripId: Long): Trip?
     suspend fun upsertTrip(trip: Trip): Long
+    suspend fun deleteTrip(tripId: Long)
 }

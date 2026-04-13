@@ -38,4 +38,8 @@ class OfflineTripRepository @Inject constructor(
             trip.id
         }
     }
+
+    override suspend fun deleteTrip(tripId: Long) {
+        tripDao.deleteTripById(tripId)
+    }
 }

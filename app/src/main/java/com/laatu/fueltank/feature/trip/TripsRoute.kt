@@ -55,6 +55,7 @@ fun TripsRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var renameTarget by remember { mutableStateOf<TripListItem?>(null) }
     var renameValue by remember { mutableStateOf("") }
+    var deleteTarget by remember { mutableStateOf<TripListItem?>(null) }
 
     AppScaffold(
         title = "",
@@ -69,6 +70,9 @@ fun TripsRoute(
             onRenameClick = { trip ->
                 renameTarget = trip
                 renameValue = trip.title
+            },
+            onDeleteClick = { trip ->
+                deleteTarget = trip
             },
         )
     }
@@ -106,6 +110,37 @@ fun TripsRoute(
             },
         )
     }
+
+    if (deleteTarget != null) {
+        AlertDialog(
+            onDismissRequest = { deleteTarget = null },
+            title = { Text(text = "Delete trip") },
+            text = {
+                Text(
+                    text = "This removes the trip from trip history. Refuels linked to it will remain in fuel history.",
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val target = deleteTarget ?: return@TextButton
+                        viewModel.deleteTrip(target.id)
+                        deleteTarget = null
+                    },
+                ) {
+                    Text(
+                        text = "Delete",
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteTarget = null }) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -115,6 +150,7 @@ private fun TripsScreen(
     onNavigateBack: () -> Unit,
     onTripClick: (Long) -> Unit,
     onRenameClick: (TripListItem) -> Unit,
+    onDeleteClick: (TripListItem) -> Unit,
 ) {
     val spacing = LocalFuelTankSpacing.current
 
@@ -155,6 +191,7 @@ private fun TripsScreen(
                     item = item,
                     onClick = { onTripClick(item.id) },
                     onRenameClick = { onRenameClick(item) },
+                    onDeleteClick = { onDeleteClick(item) },
                 )
             }
         }
@@ -307,6 +344,7 @@ private fun TripHistoryCard(
     item: TripListItem,
     onClick: () -> Unit,
     onRenameClick: () -> Unit,
+    onDeleteClick: () -> Unit,
 ) {
     var menuExpanded by remember(item.id) { mutableStateOf(false) }
 
@@ -384,6 +422,18 @@ private fun TripHistoryCard(
                                     onClick = {
                                         menuExpanded = false
                                         onRenameClick()
+                                    },
+                                )
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = "Delete trip",
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onDeleteClick()
                                     },
                                 )
                             }
