@@ -31,11 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 import com.laatu.fueltank.domain.model.DistanceInputMode
@@ -103,10 +105,10 @@ fun EndTripRoute(
 
     if (showDiscardDialog) {
         ConfirmationDialog(
-            title = "Discard end trip draft?",
-            message = "Your current trip-ending details will be lost.",
-            confirmLabel = "Discard",
-            dismissLabel = "Keep editing",
+            title = stringResource(R.string.end_trip_discard_title),
+            message = stringResource(R.string.end_trip_discard_message),
+            confirmLabel = stringResource(R.string.fuel_entry_discard),
+            dismissLabel = stringResource(R.string.fuel_entry_keep_editing),
             onConfirm = {
                 showDiscardDialog = false
                 onNavigateBack()
@@ -148,8 +150,8 @@ private fun EndTripSheet(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             EndTripHeader(
-                title = "End Trip",
-                subtitle = "Finalize the trip with the ending distance",
+                title = stringResource(R.string.end_trip_title),
+                subtitle = stringResource(R.string.end_trip_subtitle),
                 onCancelClick = onCancelClick,
                 primaryText = modalPrimaryText,
                 secondaryText = modalSecondaryText,
@@ -180,7 +182,7 @@ private fun EndTripSheet(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Started at ${uiState.startOdometerLabel}",
+                        text = stringResource(R.string.end_trip_started_at, uiState.startOdometerLabel),
                         style = MaterialTheme.typography.bodyMedium,
                         color = modalPrimaryText,
                         fontWeight = FontWeight.Medium,
@@ -200,8 +202,8 @@ private fun EndTripSheet(
                 FormField(
                     value = uiState.odometerKm,
                     onValueChange = onOdometerChange,
-                    label = "Odometer (km)",
-                    placeholder = "Current odometer reading",
+                    label = stringResource(R.string.fuel_entry_odometer_km),
+                    placeholder = stringResource(R.string.fuel_entry_odometer_placeholder),
                     filled = true,
                     isError = uiState.odometerError != null,
                     filledContainerColor = modalSurfaceColorAlt,
@@ -217,8 +219,8 @@ private fun EndTripSheet(
                 FormField(
                     value = uiState.tripMeterKm,
                     onValueChange = onTripMeterChange,
-                    label = "Trip meter (km)",
-                    placeholder = "Distance driven on this trip",
+                    label = stringResource(R.string.fuel_entry_trip_meter_km),
+                    placeholder = stringResource(R.string.end_trip_trip_meter_placeholder),
                     filled = true,
                     isError = uiState.tripMeterError != null,
                     filledContainerColor = modalSurfaceColorAlt,
@@ -235,8 +237,8 @@ private fun EndTripSheet(
             FormField(
                 value = uiState.endLocation,
                 onValueChange = onEndLocationChange,
-                label = "End location",
-                placeholder = "Helsinki, cottage, home...",
+                label = stringResource(R.string.end_trip_location_label),
+                placeholder = stringResource(R.string.end_trip_location_placeholder),
                 filled = true,
                 filledContainerColor = modalSurfaceColorAlt,
                 filledTextColor = modalPrimaryText,
@@ -247,13 +249,13 @@ private fun EndTripSheet(
             )
 
             EndTripPrimaryButton(
-                text = if (uiState.isSaving) "Ending..." else "End Trip",
+                text = if (uiState.isSaving) stringResource(R.string.end_trip_ending) else stringResource(R.string.end_trip_title),
                 enabled = uiState.canEnd && !uiState.isSaving,
                 onClick = onEndTripClick,
             )
 
             Text(
-                text = "Discard",
+                text = stringResource(R.string.fuel_entry_discard),
                 style = MaterialTheme.typography.labelLarge,
                 color = modalSecondaryText,
                 fontWeight = FontWeight.SemiBold,
@@ -293,7 +295,7 @@ private fun EndTripHeader(
             )
         }
         Text(
-            text = "Cancel",
+            text = stringResource(R.string.fuel_entry_cancel),
             style = MaterialTheme.typography.labelLarge,
             color = secondaryText,
             fontWeight = FontWeight.SemiBold,
@@ -316,7 +318,7 @@ private fun EndTripDistanceToggle(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            text = "Distance",
+            text = stringResource(R.string.fuel_entry_distance),
             style = MaterialTheme.typography.bodySmall,
             color = secondaryText,
             fontWeight = FontWeight.Medium,
@@ -330,14 +332,14 @@ private fun EndTripDistanceToggle(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 EndTripModeOption(
-                    text = "Trip meter",
+                    text = stringResource(R.string.fuel_entry_trip_meter),
                     selected = selectedMode == DistanceInputMode.TRIP_METER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
                     onClick = { onModeChange(DistanceInputMode.TRIP_METER) },
                 )
                 EndTripModeOption(
-                    text = "Odometer",
+                    text = stringResource(R.string.fuel_entry_odometer),
                     selected = selectedMode == DistanceInputMode.ODOMETER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,

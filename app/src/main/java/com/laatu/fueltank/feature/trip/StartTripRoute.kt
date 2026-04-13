@@ -31,10 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.ui.theme.Forest
@@ -99,10 +101,10 @@ fun StartTripRoute(
 
     if (showDiscardDialog) {
         ConfirmationDialog(
-            title = "Discard trip draft?",
-            message = "Your current trip details will be lost.",
-            confirmLabel = "Discard",
-            dismissLabel = "Keep editing",
+            title = stringResource(R.string.start_trip_discard_title),
+            message = stringResource(R.string.start_trip_discard_message),
+            confirmLabel = stringResource(R.string.fuel_entry_discard),
+            dismissLabel = stringResource(R.string.fuel_entry_keep_editing),
             onConfirm = {
                 showDiscardDialog = false
                 onNavigateBack()
@@ -152,8 +154,8 @@ private fun StartTripSheet(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             StartTripHeader(
-                title = "Start Trip",
-                subtitle = "Capture your trip details and start mileage",
+                title = stringResource(R.string.start_trip_title),
+                subtitle = stringResource(R.string.start_trip_subtitle),
                 onCancelClick = onCancelClick,
                 primaryText = modalPrimaryText,
                 secondaryText = modalSecondaryText,
@@ -178,13 +180,13 @@ private fun StartTripSheet(
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
-                        text = "Trip start point",
+                        text = stringResource(R.string.start_trip_start_point),
                         style = MaterialTheme.typography.labelLarge,
                         color = modalSecondaryText,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = "Starting odometer: ${uiState.currentOdometerLabel}",
+                        text = stringResource(R.string.start_trip_starting_odometer, uiState.currentOdometerLabel),
                         style = MaterialTheme.typography.bodyMedium,
                         color = modalPrimaryText,
                         fontWeight = FontWeight.Medium,
@@ -195,8 +197,8 @@ private fun StartTripSheet(
             FormField(
                 value = uiState.title,
                 onValueChange = onTitleChange,
-                label = "Trip title",
-                placeholder = "Weekend drive, commute, cabin trip...",
+                label = stringResource(R.string.start_trip_title_label),
+                placeholder = stringResource(R.string.start_trip_title_placeholder),
                 filled = true,
                 filledContainerColor = modalSurfaceColorAlt,
                 filledTextColor = modalPrimaryText,
@@ -209,8 +211,8 @@ private fun StartTripSheet(
             FormField(
                 value = uiState.startLocation,
                 onValueChange = onStartLocationChange,
-                label = "Start location",
-                placeholder = "Helsinki, Tampere, home...",
+                label = stringResource(R.string.start_trip_location_label),
+                placeholder = stringResource(R.string.start_trip_location_placeholder),
                 filled = true,
                 filledContainerColor = modalSurfaceColorAlt,
                 filledTextColor = modalPrimaryText,
@@ -221,13 +223,13 @@ private fun StartTripSheet(
             )
 
             StartTripPrimaryButton(
-                text = if (uiState.isSaving) "Starting..." else "Start Trip",
+                text = if (uiState.isSaving) stringResource(R.string.start_trip_starting) else stringResource(R.string.start_trip_title),
                 enabled = uiState.canStart && !uiState.isSaving,
                 onClick = onStartClick,
             )
 
             Text(
-                text = "Discard",
+                text = stringResource(R.string.fuel_entry_discard),
                 style = MaterialTheme.typography.labelLarge,
                 color = modalSecondaryText,
                 fontWeight = FontWeight.SemiBold,
@@ -267,7 +269,7 @@ private fun StartTripHeader(
             )
         }
         Text(
-            text = "Cancel",
+            text = stringResource(R.string.fuel_entry_cancel),
             style = MaterialTheme.typography.labelLarge,
             color = secondaryText,
             fontWeight = FontWeight.SemiBold,

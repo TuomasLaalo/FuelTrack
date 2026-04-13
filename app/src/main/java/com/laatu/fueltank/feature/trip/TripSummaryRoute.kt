@@ -41,10 +41,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.ui.theme.Forest
 import com.laatu.fueltank.ui.theme.ForestGlow
@@ -90,13 +92,13 @@ fun TripSummaryRoute(
     if (showRenameDialog) {
         AlertDialog(
             onDismissRequest = { showRenameDialog = false },
-            title = { Text(text = "Rename trip") },
+            title = { Text(text = stringResource(R.string.trip_summary_rename_title)) },
             text = {
                 OutlinedTextField(
                     value = renameValue,
                     onValueChange = { renameValue = it },
                     singleLine = true,
-                    label = { Text("Trip title") },
+                    label = { Text(stringResource(R.string.trip_summary_trip_title_label)) },
                 )
             },
             confirmButton = {
@@ -106,12 +108,12 @@ fun TripSummaryRoute(
                         showRenameDialog = false
                     },
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showRenameDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             },
         )
@@ -120,8 +122,8 @@ fun TripSummaryRoute(
     if (showEndTripDialog) {
         AlertDialog(
             onDismissRequest = { showEndTripDialog = false },
-            title = { Text(text = "End trip?") },
-            text = { Text(text = "You can review and finalize the trip details on the next screen.") },
+            title = { Text(text = stringResource(R.string.trip_summary_end_title)) },
+            text = { Text(text = stringResource(R.string.trip_summary_end_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -129,12 +131,12 @@ fun TripSummaryRoute(
                         onEndTripClick()
                     },
                 ) {
-                    Text("Continue")
+                    Text(stringResource(R.string.trip_summary_continue))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showEndTripDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             },
         )
@@ -186,7 +188,7 @@ private fun TripSummaryScreen(
             }
         }
         item {
-            SectionHeader(title = "Refuels on this trip")
+            SectionHeader(title = stringResource(R.string.trip_summary_refuels_title))
         }
         if (uiState.linkedRefuels.isEmpty()) {
             item {
@@ -199,7 +201,7 @@ private fun TripSummaryScreen(
         }
         if (!uiState.isActive) {
             item {
-                SectionHeader(title = "Consumption")
+                SectionHeader(title = stringResource(R.string.trip_summary_consumption_title))
             }
             item {
                 ConsumptionCard(uiState = uiState)
@@ -230,7 +232,7 @@ private fun TripHeader(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.common_back),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -239,7 +241,11 @@ private fun TripHeader(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    text = if (uiState.isActive) "Active Trip" else "Trip Summary",
+                    text = if (uiState.isActive) {
+                        stringResource(R.string.trip_summary_active_header)
+                    } else {
+                        stringResource(R.string.trip_summary_header)
+                    },
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
@@ -271,7 +277,7 @@ private fun TripHeader(
                 ),
             ) {
                 Text(
-                    text = "All trips",
+                    text = stringResource(R.string.dashboard_all_trips),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
@@ -285,7 +291,7 @@ private fun TripHeader(
                     IconButton(onClick = { onMenuExpandedChange(true) }) {
                         Icon(
                             imageVector = Icons.Outlined.MoreVert,
-                            contentDescription = "Trip actions",
+                            contentDescription = stringResource(R.string.trip_summary_actions),
                         )
                     }
                 }
@@ -294,7 +300,7 @@ private fun TripHeader(
                     onDismissRequest = { onMenuExpandedChange(false) },
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Rename trip") },
+                        text = { Text(stringResource(R.string.trip_summary_menu_rename)) },
                         onClick = {
                             onMenuExpandedChange(false)
                             onRenameClick()
@@ -302,17 +308,10 @@ private fun TripHeader(
                     )
                     if (uiState.isActive) {
                         DropdownMenuItem(
-                            text = { Text("End trip") },
+                            text = { Text(stringResource(R.string.trip_summary_menu_end)) },
                             onClick = onEndTripClick,
                         )
                     }
-                    DropdownMenuItem(
-                        text = { Text("Back") },
-                        onClick = {
-                            onMenuExpandedChange(false)
-                            onNavigateBack()
-                        },
-                    )
                 }
             }
         }
@@ -357,10 +356,10 @@ private fun TripStatusCard(uiState: TripSummaryUiState) {
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
-            TripHighlightMeta(label = "Started", value = uiState.startDateTimeLabel)
-            TripMetaRow(label = "Start location", value = uiState.startLocationLabel)
+            TripHighlightMeta(label = stringResource(R.string.trip_summary_status_started), value = uiState.startDateTimeLabel)
+            TripMetaRow(label = stringResource(R.string.trip_summary_status_start_location), value = uiState.startLocationLabel)
             if (uiState.durationLabel.isNotBlank()) {
-                TripMetaRow(label = "Progress", value = uiState.durationLabel)
+                TripMetaRow(label = stringResource(R.string.trip_summary_status_progress), value = uiState.durationLabel)
             }
         }
     }
@@ -415,17 +414,17 @@ private fun TripMetricsRow(uiState: TripSummaryUiState) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         TripMetricTile(
-            label = "Distance",
+            label = stringResource(R.string.trip_summary_metric_distance),
             value = uiState.distanceLabel,
             modifier = Modifier.weight(1f),
         )
         TripMetricTile(
-            label = "Fuel bought",
+            label = stringResource(R.string.trip_summary_metric_fuel_bought),
             value = uiState.fuelBoughtLabel,
             modifier = Modifier.weight(1f),
         )
         TripMetricTile(
-            label = "Fuel cost",
+            label = stringResource(R.string.trip_summary_metric_fuel_cost),
             value = uiState.fuelCostLabel,
             modifier = Modifier.weight(1f),
         )
@@ -496,7 +495,7 @@ private fun ActiveTripActionsRow(
                     contentDescription = null,
                 )
                 Text(
-                    text = "Add fuel entry",
+                    text = stringResource(R.string.trip_summary_add_fuel_entry),
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -507,7 +506,7 @@ private fun ActiveTripActionsRow(
             shape = RoundedCornerShape(18.dp),
         ) {
             Text(
-                text = "End trip",
+                text = stringResource(R.string.trip_summary_menu_end),
                 fontWeight = FontWeight.SemiBold,
             )
         }
@@ -531,7 +530,7 @@ private fun EmptyRefuelsCard() {
         shape = RoundedCornerShape(24.dp),
     ) {
         Text(
-            text = "No refuels linked to this trip yet",
+            text = stringResource(R.string.trip_summary_no_refuels),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(18.dp),
@@ -582,7 +581,7 @@ private fun LinkedRefuelCard(item: TripLinkedRefuelUiModel) {
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                LinkedRefuelMeta(label = "Quantity", value = item.litersLabel)
+                LinkedRefuelMeta(label = stringResource(R.string.dashboard_quantity), value = item.litersLabel)
             }
         }
     }
@@ -625,7 +624,7 @@ private fun ConsumptionCard(uiState: TripSummaryUiState) {
                 )
             } else {
                 Text(
-                    text = "Consumption: ${uiState.consumptionLabel}",
+                    text = stringResource(R.string.trip_summary_consumption_inline, uiState.consumptionLabel),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Medium,

@@ -51,3 +51,6 @@ Use this file to track completed work. Move items here from the backlog when the
 - Added a real app-language setting with persisted selection, startup locale application, and a dashboard hamburger-menu entry for language choice
 - Switched the main activity to `AppCompatActivity` so app-wide locale overrides are applied consistently across the Compose app
 - Verified the language-selection checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+- Completed the remaining trip-flow localization for trip summary, active trip details, start trip, and end trip so Finnish language selection no longer drops back to English on trip screens
+- Localized trip-specific dialogs, metrics, helper text, and ViewModel-owned formatted labels across the trip flow
+- Verified the trip-flow localization checkpoint with successful `assembleDebug` and `testDebugUnitTest`
