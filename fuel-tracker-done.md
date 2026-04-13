@@ -48,3 +48,6 @@ Use this file to track completed work. Move items here from the backlog when the
 - Replaced raw fuel-entry mutation exception strings with typed domain errors and mapped them to localized UI messages in edit/delete flows
 - Localized the remaining Edit Fuel Entry validation messages so add/edit form behavior now uses the same resource-backed error text path
 - Added a unit assertion for typed odometer-backwards mutation errors and re-verified the checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+- Added a real app-language setting with persisted selection, startup locale application, and a dashboard hamburger-menu entry for language choice
+- Switched the main activity to `AppCompatActivity` so app-wide locale overrides are applied consistently across the Compose app
+- Verified the language-selection checkpoint with successful `assembleDebug` and `testDebugUnitTest`

@@ -27,16 +27,22 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
@@ -48,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.laatu.fueltank.R
+import com.laatu.fueltank.core.settings.AppLanguage
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
 
@@ -61,6 +68,7 @@ fun DashboardRoute(
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
 
     AppScaffold(
         title = "",
@@ -75,6 +83,18 @@ fun DashboardRoute(
             onStartTripClick = onStartTripClick,
             onTripsClick = onTripsClick,
             onActiveTripClick = onActiveTripClick,
+            onLanguageClick = { showLanguageDialog = true },
+        )
+    }
+
+    if (showLanguageDialog) {
+        LanguageSelectionDialog(
+            selectedLanguage = uiState.currentLanguage,
+            onDismiss = { showLanguageDialog = false },
+            onLanguageSelected = { language ->
+                showLanguageDialog = false
+                viewModel.setAppLanguage(language)
+            },
         )
     }
 }
@@ -88,6 +108,7 @@ private fun DashboardScreen(
     onStartTripClick: () -> Unit,
     onTripsClick: () -> Unit,
     onActiveTripClick: (Long) -> Unit,
+    onLanguageClick: () -> Unit,
 ) {
     val spacing = LocalFuelTankSpacing.current
 
@@ -119,6 +140,7 @@ private fun DashboardScreen(
                 onTripsClick = onTripsClick,
                 onActiveTripClick = onActiveTripClick,
                 onAddFuelEntryClick = onAddFuelEntryClick,
+                onLanguageClick = onLanguageClick,
             )
         }
         item {
@@ -202,7 +224,10 @@ private fun FuelTrackHeader(
     onTripsClick: () -> Unit,
     onActiveTripClick: (Long) -> Unit,
     onAddFuelEntryClick: () -> Unit,
+    onLanguageClick: () -> Unit,
 ) {
+    var menuExpanded by rememberSaveable { mutableStateOf(false) }
+
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -213,11 +238,28 @@ private fun FuelTrackHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Rounded.Menu,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Menu,
+                            contentDescription = stringResource(R.string.dashboard_menu),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.dashboard_menu_language)) },
+                            onClick = {
+                                menuExpanded = false
+                                onLanguageClick()
+                            },
+                        )
+                    }
+                }
                 Text(
                     text = stringResource(R.string.dashboard_brand),
                     style = MaterialTheme.typography.titleLarge,
@@ -622,4 +664,79 @@ private fun SectionTitle(
         color = MaterialTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Bold,
     )
+}
+
+@Composable
+private fun LanguageSelectionDialog(
+    selectedLanguage: AppLanguage,
+    onDismiss: () -> Unit,
+    onLanguageSelected: (AppLanguage) -> Unit,
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(R.string.dashboard_language_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LanguageOptionRow(
+                    title = stringResource(R.string.dashboard_language_system),
+                    selected = selectedLanguage == AppLanguage.SYSTEM,
+                    onClick = { onLanguageSelected(AppLanguage.SYSTEM) },
+                )
+                LanguageOptionRow(
+                    title = stringResource(R.string.dashboard_language_english),
+                    selected = selectedLanguage == AppLanguage.ENGLISH,
+                    onClick = { onLanguageSelected(AppLanguage.ENGLISH) },
+                )
+                LanguageOptionRow(
+                    title = stringResource(R.string.dashboard_language_finnish),
+                    selected = selectedLanguage == AppLanguage.FINNISH,
+                    onClick = { onLanguageSelected(AppLanguage.FINNISH) },
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.common_cancel))
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+    )
+}
+
+@Composable
+private fun LanguageOptionRow(
+    title: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = if (selected) MaterialTheme.colorScheme.surfaceContainerLow else Color.Transparent,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            RadioButton(
+                selected = selected,
+                onClick = onClick,
+            )
+        }
+    }
 }

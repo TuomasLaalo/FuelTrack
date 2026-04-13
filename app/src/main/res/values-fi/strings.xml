@@ -1,6 +1,12 @@
 <resources>
     <string name="app_name">FuelTank</string>
     <string name="dashboard_brand">FuelTrack</string>
+    <string name="dashboard_menu">Sovellusvalikko</string>
+    <string name="dashboard_menu_language">Kieli</string>
+    <string name="dashboard_language_title">Valitse kieli</string>
+    <string name="dashboard_language_system">Järjestelmän oletus</string>
+    <string name="dashboard_language_english">English</string>
+    <string name="dashboard_language_finnish">Suomi</string>
     <string name="dashboard_trip_button_start">Aloita matka</string>
     <string name="dashboard_trip_button_open_active">Avaa aktiivinen matka</string>
     <string name="dashboard_add_refill">Lisää tankkaus</string>

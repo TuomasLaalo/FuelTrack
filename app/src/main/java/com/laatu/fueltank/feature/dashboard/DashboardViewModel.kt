@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.laatu.fueltank.R
 import com.laatu.fueltank.core.localization.StringResourceProvider
+import com.laatu.fueltank.core.settings.AppLanguage
+import com.laatu.fueltank.core.settings.AppLanguageManager
 import com.laatu.fueltank.domain.model.CalculationConfidence
 import com.laatu.fueltank.domain.model.Car
 import com.laatu.fueltank.domain.model.FuelEntry
@@ -38,18 +40,22 @@ class DashboardViewModel @Inject constructor(
     private val currentOdometerService: CurrentOdometerService,
     private val buildDashboardStatsUseCase: BuildDashboardStatsUseCase,
     private val stringResourceProvider: StringResourceProvider,
+    private val appLanguageManager: AppLanguageManager,
 ) : ViewModel() {
     val uiState: StateFlow<DashboardUiState> = observePrimaryCarUseCase()
         .flatMapLatest { car ->
             if (car == null) {
-                flowOf(DashboardUiState())
+                combine(flowOf(DashboardUiState()), appLanguageManager.currentLanguage) { state, language ->
+                    state.copy(currentLanguage = language)
+                }
             } else {
                 combine(
                     flowOf(car),
                     fuelEntryRepository.observeEntriesForCar(car.id),
                     tripRepository.observeTripsForCar(car.id),
-                ) { activeCar, entries, trips ->
-                    toUiState(activeCar, entries, trips)
+                    appLanguageManager.currentLanguage,
+                ) { activeCar, entries, trips, language ->
+                    toUiState(activeCar, entries, trips, language)
                 }
             }
         }
@@ -59,7 +65,16 @@ class DashboardViewModel @Inject constructor(
             initialValue = DashboardUiState(isLoading = true),
         )
 
-    private fun toUiState(car: Car, entries: List<FuelEntry>, trips: List<Trip>): DashboardUiState {
+    fun setAppLanguage(language: AppLanguage) {
+        appLanguageManager.setLanguage(language)
+    }
+
+    private fun toUiState(
+        car: Car,
+        entries: List<FuelEntry>,
+        trips: List<Trip>,
+        currentLanguage: AppLanguage,
+    ): DashboardUiState {
         val currentOdometer = currentOdometerService.resolve(car, entries, trips)
         val stats = buildDashboardStatsUseCase(entries)
         val activeTrip = trips.firstOrNull { it.status == TripStatus.ACTIVE }
@@ -85,6 +100,7 @@ class DashboardViewModel @Inject constructor(
                 CalculationConfidence.LOW_CONFIDENCE -> stringResourceProvider.get(R.string.dashboard_low_confidence_estimate)
                 CalculationConfidence.NOT_AVAILABLE -> stringResourceProvider.get(R.string.dashboard_unlock_reliable_consumption)
             },
+            currentLanguage = currentLanguage,
             activeTrip = activeTrip?.toUiModel(stringResourceProvider),
             latestRefuel = latestEntry?.toLatestRefuelCard(stringResourceProvider, locale),
             utilityCard = DashboardUtilityUiModel(
@@ -106,6 +122,7 @@ data class DashboardUiState(
     val heroConsumptionValue: String = "--",
     val heroConsumptionUnit: String = "",
     val heroTrendMessage: String = "",
+    val currentLanguage: AppLanguage = AppLanguage.SYSTEM,
     val activeTrip: DashboardActiveTripUiModel? = null,
     val latestRefuel: DashboardLatestRefuelUiModel? = null,
     val utilityCard: DashboardUtilityUiModel? = null,
