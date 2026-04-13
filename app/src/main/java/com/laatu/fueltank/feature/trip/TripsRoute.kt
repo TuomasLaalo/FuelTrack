@@ -39,10 +39,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
 
@@ -80,13 +82,13 @@ fun TripsRoute(
     if (renameTarget != null) {
         AlertDialog(
             onDismissRequest = { renameTarget = null },
-            title = { Text(text = "Rename trip") },
+            title = { Text(text = stringResource(R.string.trip_history_rename_title)) },
             text = {
                 OutlinedTextField(
                     value = renameValue,
                     onValueChange = { renameValue = it },
                     singleLine = true,
-                    label = { Text("Trip title") },
+                    label = { Text(stringResource(R.string.trip_history_trip_title_label)) },
                 )
             },
             confirmButton = {
@@ -100,12 +102,12 @@ fun TripsRoute(
                         renameTarget = null
                     },
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { renameTarget = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             },
         )
@@ -114,10 +116,10 @@ fun TripsRoute(
     if (deleteTarget != null) {
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text(text = "Delete trip") },
+            title = { Text(text = stringResource(R.string.trip_history_delete_title)) },
             text = {
                 Text(
-                    text = "This removes the trip from trip history. Refuels linked to it will remain in fuel history.",
+                    text = stringResource(R.string.trip_history_delete_message),
                 )
             },
             confirmButton = {
@@ -129,14 +131,14 @@ fun TripsRoute(
                     },
                 ) {
                     Text(
-                        text = "Delete",
+                        text = stringResource(R.string.common_delete),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             },
         )
@@ -214,7 +216,7 @@ private fun TripsHeader(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.common_back),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -223,13 +225,13 @@ private fun TripsHeader(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = "All Trips",
+                    text = stringResource(R.string.trip_history_title),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Trip history",
+                    text = stringResource(R.string.trip_history_subtitle),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -254,20 +256,20 @@ private fun TripsSummaryCard(
             verticalAlignment = Alignment.Top,
         ) {
             TripsSummaryMetric(
-                label = "Total Trips",
+                label = stringResource(R.string.trip_history_summary_total_trips),
                 value = uiState.totalTripsLabel,
                 accent = true,
                 modifier = Modifier.weight(1f),
             )
             TripsSummaryDivider()
             TripsSummaryMetric(
-                label = "Active",
+                label = stringResource(R.string.trip_history_summary_active),
                 value = uiState.activeTripsLabel,
                 modifier = Modifier.weight(1f),
             )
             TripsSummaryDivider()
             TripsSummaryMetric(
-                label = "Completed",
+                label = stringResource(R.string.trip_history_summary_completed),
                 value = uiState.completedTripsLabel,
                 modifier = Modifier.weight(1f),
             )
@@ -325,13 +327,13 @@ private fun EmptyTripsCard() {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "No trips yet",
+                text = stringResource(R.string.trip_history_empty_title),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "Start a trip from the dashboard when you want to follow one longer route separately.",
+                text = stringResource(R.string.trip_history_empty_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -406,8 +408,8 @@ private fun TripHistoryCard(
                                     .height(22.dp),
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.MoreVert,
-                                    contentDescription = "More actions",
+                                imageVector = Icons.Outlined.MoreVert,
+                                contentDescription = stringResource(R.string.trip_history_more_actions),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.width(16.dp).height(16.dp),
                                 )
@@ -418,7 +420,7 @@ private fun TripHistoryCard(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Rename trip") },
+                                    text = { Text(stringResource(R.string.trip_history_menu_rename)) },
                                     onClick = {
                                         menuExpanded = false
                                         onRenameClick()
@@ -427,7 +429,7 @@ private fun TripHistoryCard(
                                 DropdownMenuItem(
                                     text = {
                                         Text(
-                                            text = "Delete trip",
+                                            text = stringResource(R.string.trip_history_menu_delete),
                                             color = MaterialTheme.colorScheme.error,
                                         )
                                     },
@@ -449,12 +451,12 @@ private fun TripHistoryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 TripHistoryMetaBlock(
-                    label = "Start",
+                    label = stringResource(R.string.trip_history_label_start),
                     value = item.startLocationLabel,
                     modifier = Modifier.weight(1f),
                 )
                 TripHistoryMetaBlock(
-                    label = "Distance",
+                    label = stringResource(R.string.trip_history_label_distance),
                     value = item.distanceLabel,
                     modifier = Modifier.weight(1f),
                     alignEnd = true,

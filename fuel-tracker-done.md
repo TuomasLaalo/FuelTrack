@@ -42,3 +42,6 @@ Use this file to track completed work. Move items here from the backlog when the
 - Added a small `StringResourceProvider` to localize ViewModel-owned fallback and formatted text cleanly without pushing resource lookups into ad hoc code paths
 - Fixed the stale `TripUseCasesTest` fake repository so the unit test suite matches the current `TripRepository` interface
 - Verified the checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+- Completed the second localization slice for Fuel History and Trips, including headers, cards, menus, dialogs, empty states, and ViewModel-owned date/status formatting
+- Cleaned older euro/date formatting in Fuel History so localized screens no longer depend on broken encoded symbols in UI output
+- Verified the second localization checkpoint with successful `assembleDebug` and `testDebugUnitTest`

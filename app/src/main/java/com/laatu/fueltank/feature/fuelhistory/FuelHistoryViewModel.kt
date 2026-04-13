@@ -2,6 +2,8 @@ package com.laatu.fueltank.feature.fuelhistory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.localization.StringResourceProvider
 import com.laatu.fueltank.domain.model.CalculationConfidence
 import com.laatu.fueltank.domain.model.FuelEntry
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
@@ -33,6 +35,7 @@ class FuelHistoryViewModel @Inject constructor(
     fuelEntryRepository: FuelEntryRepository,
     private val buildDashboardStatsUseCase: BuildDashboardStatsUseCase,
     private val deleteFuelEntryUseCase: DeleteFuelEntryUseCase,
+    private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
     private val pendingDeleteId = MutableStateFlow<Long?>(null)
     private val errorMessage = MutableStateFlow<String?>(null)
@@ -52,6 +55,7 @@ class FuelHistoryViewModel @Inject constructor(
                         errorMessage = message,
                         sortOrder = order,
                         buildDashboardStatsUseCase = buildDashboardStatsUseCase,
+                        stringResourceProvider = stringResourceProvider,
                     )
                 }
             } else {
@@ -66,6 +70,7 @@ class FuelHistoryViewModel @Inject constructor(
                         errorMessage = message,
                         sortOrder = order,
                         buildDashboardStatsUseCase = buildDashboardStatsUseCase,
+                        stringResourceProvider = stringResourceProvider,
                     )
                 }
             }
@@ -149,29 +154,43 @@ private fun List<FuelEntry>.toUiState(
     errorMessage: String?,
     sortOrder: FuelHistorySortOrder,
     buildDashboardStatsUseCase: BuildDashboardStatsUseCase,
+    stringResourceProvider: StringResourceProvider,
 ): FuelHistoryUiState {
+    val locale = stringResourceProvider.currentLocale()
     val orderedEntries = when (sortOrder) {
         FuelHistorySortOrder.NEWEST_FIRST -> sortedByDescending { it.dateTimeEpochMillis }
         FuelHistorySortOrder.OLDEST_FIRST -> sortedBy { it.dateTimeEpochMillis }
     }
+    val monthFormatter = DateTimeFormatter
+        .ofPattern(stringResourceProvider.get(R.string.fuel_history_month_format), locale)
+        .withZone(ZoneId.systemDefault())
+
     val sections = orderedEntries
-        .groupBy { monthFormatter.format(Instant.ofEpochMilli(it.dateTimeEpochMillis)).uppercase(Locale.getDefault()) }
+        .groupBy { monthFormatter.format(Instant.ofEpochMilli(it.dateTimeEpochMillis)).uppercase(locale) }
         .map { (title, entries) ->
             FuelHistorySectionUiModel(
                 title = title,
-                entries = entries.map { it.toUiItem() },
+                entries = entries.map { it.toUiItem(stringResourceProvider, locale) },
             )
         }
 
     val stats = buildDashboardStatsUseCase(this)
     val summary = FuelHistorySummaryUiModel(
         totalRefuelsLabel = size.toString(),
-        totalQuantityLabel = litersFormat.format(stats.totalLitersMilliliters / 1000.0) + " L",
+        totalQuantityLabel = stringResourceProvider.get(
+            R.string.unit_liters_short,
+            litersFormat.format(stats.totalLitersMilliliters / 1000.0),
+        ),
         averageConsumptionLabel = when (stats.confidence) {
             CalculationConfidence.HIGH_CONFIDENCE -> {
-                stats.averageConsumptionLitersPer100Km?.let { consumptionFormat.format(it) + " L/100km" } ?: "Not yet"
+                stats.averageConsumptionLitersPer100Km?.let {
+                    stringResourceProvider.get(
+                        R.string.fuel_history_consumption_value,
+                        consumptionFormat.format(it),
+                    )
+                } ?: stringResourceProvider.get(R.string.fuel_history_not_yet)
             }
-            else -> "Not yet"
+            else -> stringResourceProvider.get(R.string.fuel_history_not_yet)
         },
     )
 
@@ -185,22 +204,32 @@ private fun List<FuelEntry>.toUiState(
     )
 }
 
-private fun FuelEntry.toUiItem(): FuelHistoryItem = FuelHistoryItem(
-    id = id,
-    stationBrand = stationBrand,
-    dateLabel = dateFormatter.format(Instant.ofEpochMilli(dateTimeEpochMillis)),
-    totalCostLabel = totalCostCents.toEuroString(),
-    quantityLabel = litersFormat.format(litersMilliliters / 1000.0) + " L",
-    pricePerUnitLabel = pricePerLiterMicros.toEuroPerUnitString(),
-    note = note?.trim()?.takeIf { it.isNotEmpty() },
-)
+private fun FuelEntry.toUiItem(
+    stringResourceProvider: StringResourceProvider,
+    locale: Locale,
+): FuelHistoryItem {
+    val dateFormatter = DateTimeFormatter
+        .ofPattern(stringResourceProvider.get(R.string.fuel_history_date_format), locale)
+        .withZone(ZoneId.systemDefault())
 
-private val dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy").withZone(ZoneId.systemDefault())
-private val monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy").withZone(ZoneId.systemDefault())
+    return FuelHistoryItem(
+        id = id,
+        stationBrand = stationBrand,
+        dateLabel = dateFormatter.format(Instant.ofEpochMilli(dateTimeEpochMillis)),
+        totalCostLabel = totalCostCents.toEuroString(),
+        quantityLabel = stringResourceProvider.get(
+            R.string.unit_liters_short,
+            litersFormat.format(litersMilliliters / 1000.0),
+        ),
+        pricePerUnitLabel = pricePerLiterMicros.toEuroPerUnitString(),
+        note = note?.trim()?.takeIf { it.isNotEmpty() },
+    )
+}
+
 private val litersFormat = DecimalFormat("0.0#")
 private val consumptionFormat = DecimalFormat("0.0")
 private val euroFormat = DecimalFormat("0.00")
 
-private fun Long.toEuroString(): String = "€" + euroFormat.format(this / 100.0)
+private fun Long.toEuroString(): String = euroFormat.format(this / 100.0) + " €"
 
-private fun Long.toEuroPerUnitString(): String = "€" + euroFormat.format(this / 1_000_000.0)
+private fun Long.toEuroPerUnitString(): String = euroFormat.format(this / 1_000_000.0) + " €"

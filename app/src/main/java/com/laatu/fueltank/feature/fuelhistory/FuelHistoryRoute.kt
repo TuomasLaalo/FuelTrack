@@ -41,11 +41,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.laatu.fueltank.R
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
@@ -76,10 +78,10 @@ fun FuelHistoryRoute(
 
     if (uiState.pendingDeleteId != null) {
         ConfirmationDialog(
-            title = "Delete fuel entry",
-            message = "This removes the fuel entry from history and totals.",
-            confirmLabel = "Delete",
-            dismissLabel = "Cancel",
+            title = stringResource(R.string.fuel_history_delete_title),
+            message = stringResource(R.string.fuel_history_delete_message),
+            confirmLabel = stringResource(R.string.common_delete),
+            dismissLabel = stringResource(R.string.common_cancel),
             onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::dismissDeleteDialog,
         )
@@ -181,7 +183,7 @@ private fun FuelHistoryHeader(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.common_back),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -190,13 +192,13 @@ private fun FuelHistoryHeader(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = "All Refuels",
+                    text = stringResource(R.string.fuel_history_title),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Fuel history",
+                    text = stringResource(R.string.fuel_history_subtitle),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -210,9 +212,9 @@ private fun FuelHistoryHeader(
                 Icon(
                     imageVector = Icons.Outlined.SwapVert,
                     contentDescription = if (sortOrder == FuelHistorySortOrder.NEWEST_FIRST) {
-                        "Newest first"
+                        stringResource(R.string.fuel_history_sort_newest)
                     } else {
-                        "Oldest first"
+                        stringResource(R.string.fuel_history_sort_oldest)
                     },
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
@@ -237,20 +239,20 @@ private fun FuelHistorySummaryCard(
             verticalAlignment = Alignment.Top,
         ) {
             SummaryMetric(
-                label = "Total Refuels",
+                label = stringResource(R.string.fuel_history_summary_total_refuels),
                 value = summary.totalRefuelsLabel,
                 accent = true,
                 modifier = Modifier.weight(1f),
             )
             SummaryDivider()
             SummaryMetric(
-                label = "Total Quantity",
+                label = stringResource(R.string.fuel_history_summary_total_quantity),
                 value = summary.totalQuantityLabel,
                 modifier = Modifier.weight(1f),
             )
             SummaryDivider()
             SummaryMetric(
-                label = "Avg Consumption",
+                label = stringResource(R.string.fuel_history_summary_avg_consumption),
                 value = summary.averageConsumptionLabel,
                 modifier = Modifier.weight(1f),
             )
@@ -367,7 +369,7 @@ private fun RefuelHistoryCard(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.MoreVert,
-                                contentDescription = "More actions",
+                                contentDescription = stringResource(R.string.fuel_history_more_actions),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(16.dp),
                             )
@@ -378,7 +380,7 @@ private fun RefuelHistoryCard(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Edit") },
+                                text = { Text(stringResource(R.string.common_edit)) },
                                 onClick = {
                                     menuExpanded = false
                                     onEditClick()
@@ -386,8 +388,8 @@ private fun RefuelHistoryCard(
                             )
                             DropdownMenuItem(
                                 text = {
-                                    Text(
-                                        text = "Delete",
+                                        Text(
+                                            text = stringResource(R.string.common_delete),
                                         color = MaterialTheme.colorScheme.error,
                                     )
                                 },
@@ -408,12 +410,12 @@ private fun RefuelHistoryCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 RefuelHistoryMetaBlock(
-                    label = "Quantity",
+                    label = stringResource(R.string.dashboard_quantity),
                     value = entry.quantityLabel,
                     modifier = Modifier.weight(1f),
                 )
                 RefuelHistoryMetaBlock(
-                    label = "Price / Unit",
+                    label = stringResource(R.string.fuel_history_price_per_unit),
                     value = entry.pricePerUnitLabel,
                     modifier = Modifier.weight(1f),
                     alignEnd = true,
@@ -494,7 +496,7 @@ private fun HistoryErrorCard(
                 onClick = onDismissError,
                 modifier = Modifier.align(Alignment.End),
             ) {
-                Text(text = "Dismiss")
+                Text(text = stringResource(R.string.common_dismiss))
             }
         }
     }
@@ -513,13 +515,13 @@ private fun EmptyHistoryCard() {
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
-                text = "No refuels yet",
+                text = stringResource(R.string.fuel_history_no_refuels),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "Your fuel history will appear here once you add the first refill.",
+                text = stringResource(R.string.fuel_history_no_refuels_body),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

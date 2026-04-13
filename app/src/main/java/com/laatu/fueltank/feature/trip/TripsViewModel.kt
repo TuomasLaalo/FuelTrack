@@ -2,6 +2,8 @@ package com.laatu.fueltank.feature.trip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.localization.StringResourceProvider
 import com.laatu.fueltank.domain.model.Trip
 import com.laatu.fueltank.domain.model.TripStatus
 import com.laatu.fueltank.domain.repository.TripRepository
@@ -12,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +32,7 @@ class TripsViewModel @Inject constructor(
     tripRepository: TripRepository,
     private val renameTripUseCase: RenameTripUseCase,
     private val deleteTripUseCase: DeleteTripUseCase,
+    private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
     val uiState: StateFlow<TripsUiState> = observePrimaryCarUseCase()
         .flatMapLatest { car ->
@@ -36,11 +40,12 @@ class TripsViewModel @Inject constructor(
                 flowOf(TripsUiState())
             } else {
                 tripRepository.observeTripsForCar(car.id).map { trips ->
+                    val locale = stringResourceProvider.currentLocale()
                     TripsUiState(
                         totalTripsLabel = trips.size.toString(),
                         activeTripsLabel = trips.count { it.status == TripStatus.ACTIVE }.toString(),
                         completedTripsLabel = trips.count { it.status == TripStatus.COMPLETED }.toString(),
-                        items = trips.map { it.toUiItem() },
+                        items = trips.map { it.toUiItem(stringResourceProvider, locale) },
                     )
                 }
             }
@@ -88,17 +93,28 @@ data class TripListItem(
     val distanceLabel: String,
 )
 
-private fun Trip.toUiItem(): TripListItem {
-    val formatter = DateTimeFormatter.ofPattern("dd MMM yyyy").withZone(ZoneId.systemDefault())
-    val statusLabel = if (status == TripStatus.ACTIVE) "Active" else "Completed"
-    val distanceLabel = endOdometerKm?.let { "${it - startOdometerKm} km" } ?: "In progress"
+private fun Trip.toUiItem(
+    stringResourceProvider: StringResourceProvider,
+    locale: Locale,
+): TripListItem {
+    val formatter = DateTimeFormatter
+        .ofPattern(stringResourceProvider.get(R.string.trip_history_date_format), locale)
+        .withZone(ZoneId.systemDefault())
+    val statusLabel = if (status == TripStatus.ACTIVE) {
+        stringResourceProvider.get(R.string.trip_history_status_active)
+    } else {
+        stringResourceProvider.get(R.string.trip_history_status_completed)
+    }
+    val distanceLabel = endOdometerKm?.let {
+        stringResourceProvider.get(R.string.dashboard_distance_km, it - startOdometerKm)
+    } ?: stringResourceProvider.get(R.string.trip_history_in_progress)
     return TripListItem(
         id = id,
         isActive = status == TripStatus.ACTIVE,
         statusLabel = statusLabel,
-        title = title ?: startLocation ?: "Trip",
+        title = title ?: startLocation ?: stringResourceProvider.get(R.string.trip_history_default_title),
         dateLabel = formatter.format(Instant.ofEpochMilli(startTimeEpochMillis)),
-        startLocationLabel = startLocation ?: "No start location",
+        startLocationLabel = startLocation ?: stringResourceProvider.get(R.string.trip_history_no_start_location),
         distanceLabel = distanceLabel,
     )
 }
