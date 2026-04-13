@@ -6,6 +6,7 @@ import com.laatu.fueltank.domain.model.Trip
 import com.laatu.fueltank.domain.model.TripStatus
 import com.laatu.fueltank.domain.repository.TripRepository
 import com.laatu.fueltank.domain.usecase.ObservePrimaryCarUseCase
+import com.laatu.fueltank.domain.usecase.RenameTripUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -18,12 +19,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class TripsViewModel @Inject constructor(
     observePrimaryCarUseCase: ObservePrimaryCarUseCase,
     tripRepository: TripRepository,
+    private val renameTripUseCase: RenameTripUseCase,
 ) : ViewModel() {
     val uiState: StateFlow<TripsUiState> = observePrimaryCarUseCase()
         .flatMapLatest { car ->
@@ -45,6 +48,18 @@ class TripsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = TripsUiState(),
         )
+
+    fun renameTrip(
+        tripId: Long,
+        title: String,
+    ) {
+        viewModelScope.launch {
+            renameTripUseCase(
+                tripId = tripId,
+                title = title,
+            )
+        }
+    }
 }
 
 data class TripsUiState(

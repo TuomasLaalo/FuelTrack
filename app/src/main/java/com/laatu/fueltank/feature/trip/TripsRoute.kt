@@ -15,18 +15,27 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Route
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +53,8 @@ fun TripsRoute(
     viewModel: TripsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var renameTarget by remember { mutableStateOf<TripListItem?>(null) }
+    var renameValue by remember { mutableStateOf("") }
 
     AppScaffold(
         title = "",
@@ -55,6 +66,44 @@ fun TripsRoute(
             uiState = uiState,
             onNavigateBack = onNavigateBack,
             onTripClick = onTripClick,
+            onRenameClick = { trip ->
+                renameTarget = trip
+                renameValue = trip.title
+            },
+        )
+    }
+
+    if (renameTarget != null) {
+        AlertDialog(
+            onDismissRequest = { renameTarget = null },
+            title = { Text(text = "Rename trip") },
+            text = {
+                OutlinedTextField(
+                    value = renameValue,
+                    onValueChange = { renameValue = it },
+                    singleLine = true,
+                    label = { Text("Trip title") },
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val target = renameTarget ?: return@TextButton
+                        viewModel.renameTrip(
+                            tripId = target.id,
+                            title = renameValue,
+                        )
+                        renameTarget = null
+                    },
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { renameTarget = null }) {
+                    Text("Cancel")
+                }
+            },
         )
     }
 }
@@ -65,6 +114,7 @@ private fun TripsScreen(
     uiState: TripsUiState,
     onNavigateBack: () -> Unit,
     onTripClick: (Long) -> Unit,
+    onRenameClick: (TripListItem) -> Unit,
 ) {
     val spacing = LocalFuelTankSpacing.current
 
@@ -104,6 +154,7 @@ private fun TripsScreen(
                 TripHistoryCard(
                     item = item,
                     onClick = { onTripClick(item.id) },
+                    onRenameClick = { onRenameClick(item) },
                 )
             }
         }
@@ -255,7 +306,10 @@ private fun EmptyTripsCard() {
 private fun TripHistoryCard(
     item: TripListItem,
     onClick: () -> Unit,
+    onRenameClick: () -> Unit,
 ) {
+    var menuExpanded by remember(item.id) { mutableStateOf(false) }
+
     Card(
         modifier = Modifier.padding(bottom = 10.dp),
         shape = RoundedCornerShape(24.dp),
@@ -294,13 +348,47 @@ private fun TripHistoryCard(
                     shape = RoundedCornerShape(999.dp),
                     color = if (item.isActive) Color(0xFFD9EEE4) else MaterialTheme.colorScheme.surfaceContainerLow,
                 ) {
-                    Text(
-                        text = item.statusLabel,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Text(
+                            text = item.statusLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(start = 10.dp, top = 7.dp, bottom = 7.dp),
+                        )
+                        Box {
+                            IconButton(
+                                onClick = { menuExpanded = true },
+                                modifier = Modifier
+                                    .padding(end = 2.dp)
+                                    .width(22.dp)
+                                    .height(22.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.MoreVert,
+                                    contentDescription = "More actions",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.width(16.dp).height(16.dp),
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false },
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("Rename trip") },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onRenameClick()
+                                    },
+                                )
+                            }
+                        }
+                    }
                 }
             }
             HorizontalDivider(
