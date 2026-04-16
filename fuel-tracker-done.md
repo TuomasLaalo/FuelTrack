@@ -54,3 +54,9 @@ Use this file to track completed work. Move items here from the backlog when the
 - Completed the remaining trip-flow localization for trip summary, active trip details, start trip, and end trip so Finnish language selection no longer drops back to English on trip screens
 - Localized trip-specific dialogs, metrics, helper text, and ViewModel-owned formatted labels across the trip flow
 - Verified the trip-flow localization checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+
+### 2026-04-16
+
+- Polished the public repo surface by rewriting `README.md`, removing an empty dashboard design artifact, and adding targeted orientation comments in non-obvious core logic files
+- Refined Finnish fuel-entry wording by replacing `odometri` with `mittarilukema` in the visible app strings
+- Verified the polish checkpoint with successful `assembleDebug` and `testDebugUnitTest`

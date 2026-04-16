@@ -32,6 +32,8 @@ class AppLanguageManager @Inject constructor(
         AppLanguage.fromStorageValue(preferences.getString(KEY_APP_LANGUAGE, AppLanguage.SYSTEM.storageValue))
 
     private fun applyLanguage(language: AppLanguage) {
+        // Locale override is applied at the app level so Compose screens and ViewModel-owned
+        // string formatting both observe the same language selection after startup and changes.
         val locales = language.languageTag
             ?.let { LocaleListCompat.forLanguageTags(it) }
             ?: LocaleListCompat.getEmptyLocaleList()

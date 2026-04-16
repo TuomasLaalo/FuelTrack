@@ -49,6 +49,8 @@ class FuelEntryMutationPlanner @Inject constructor() {
         initialOdometerKm: Long,
         entries: List<FuelEntry>,
     ): List<FuelEntry> {
+        // Historical edits and deletes can invalidate later trip-meter-based entries,
+        // so the full chain must be recomputed in chronological order.
         val sortedEntries = entries.sortedWith(
             compareBy<FuelEntry> { it.dateTimeEpochMillis }
                 .thenBy { it.createdAtEpochMillis }
@@ -59,6 +61,8 @@ class FuelEntryMutationPlanner @Inject constructor() {
         return sortedEntries.map { entry ->
             val normalizedOdometerKm = when (entry.distanceInputMode) {
                 DistanceInputMode.ODOMETER -> {
+                    // Manual odometer entries are treated as explicit checkpoints and
+                    // are not allowed to move backwards relative to earlier history.
                     if (entry.odometerKm < previousOdometerKm) {
                         throw FuelEntryMutationException(FuelEntryMutationError.ODOMETER_MOVES_BACKWARDS)
                     }

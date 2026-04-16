@@ -20,6 +20,8 @@ class TripSummaryService @Inject constructor() {
 
         val fuelBoughtMilliliters = linkedEntries.sumOf { it.litersMilliliters }
         val fuelCostCents = linkedEntries.sumOf { it.totalCostCents }
+        // Trip consumption is intentionally conservative in v1: it is based on refuels
+        // explicitly linked to the trip, not inferred tank-state estimation.
         val averageConsumption = if (distanceKm > 0 && fuelBoughtMilliliters > 0) {
             (fuelBoughtMilliliters / 1000.0) / distanceKm * 100.0
         } else {

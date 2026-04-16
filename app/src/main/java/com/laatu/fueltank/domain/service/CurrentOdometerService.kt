@@ -13,6 +13,8 @@ class CurrentOdometerService @Inject constructor() {
         fuelEntries: List<FuelEntry>,
         trips: List<Trip>,
     ): CurrentOdometerSnapshot {
+        // The onboarding odometer is only a seed value. The current odometer is derived
+        // from the newest known fuel-entry or trip history so it does not drift from reality.
         val latestFuelOdometer = fuelEntries.maxOfOrNull { it.odometerKm }
         val latestTripOdometer = trips.maxOfOrNull { trip ->
             when (trip.status) {
