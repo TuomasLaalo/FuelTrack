@@ -337,7 +337,7 @@ private fun TripStatusCard(uiState: TripSummaryUiState) {
             ) {
                 Surface(
                     color = when (uiState.statusTone) {
-                        TripStatusTone.Active -> Color(0xFFD9EEE4)
+                        TripStatusTone.Active -> MaterialTheme.colorScheme.secondaryContainer
                         TripStatusTone.Completed -> MaterialTheme.colorScheme.surfaceContainerHighest
                     },
                     shape = RoundedCornerShape(999.dp),

@@ -60,3 +60,9 @@ Use this file to track completed work. Move items here from the backlog when the
 - Polished the public repo surface by rewriting `README.md`, removing an empty dashboard design artifact, and adding targeted orientation comments in non-obvious core logic files
 - Refined Finnish fuel-entry wording by replacing `odometri` with `mittarilukema` in the visible app strings
 - Verified the polish checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+
+### 2026-04-17
+
+- Audited the newer Compose UI for hardcoded colors and moved the modal add/start/end trip palette into a shared theme-level `FuelTrackModalColors` helper
+- Replaced remaining one-off active-state and hero-card colors in Dashboard, Trips, and Trip Summary with theme-driven colors so future dark-theme work is centralized instead of screen-local
+- Verified the theme-readiness checkpoint with successful `assembleDebug` and `testDebugUnitTest`

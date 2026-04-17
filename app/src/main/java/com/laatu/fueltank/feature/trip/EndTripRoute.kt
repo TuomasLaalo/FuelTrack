@@ -44,6 +44,7 @@ import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.ui.theme.Forest
 import com.laatu.fueltank.ui.theme.ForestGlow
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
+import com.laatu.fueltank.ui.theme.rememberFuelTrackModalColors
 
 @Composable
 fun EndTripRoute(
@@ -130,17 +131,12 @@ private fun EndTripSheet(
     onEndTripClick: () -> Unit,
 ) {
     val spacing = LocalFuelTankSpacing.current
-    val modalBackgroundColor = MaterialTheme.colorScheme.background
-    val modalSurfaceColorAlt = Color(0xFFE2E6E0)
-    val modalPrimaryText = Color(0xFF17352D)
-    val modalSecondaryText = Color(0xFF305A4E)
-    val modalMutedText = Color(0xFF3E6D60)
-    val modalFieldPlaceholder = Color(0xFF64736F)
+    val modalColors = rememberFuelTrackModalColors(modalStyle = true)
 
     Surface(
         modifier = modifier.fillMaxSize(),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        color = modalBackgroundColor,
+        color = modalColors.background,
     ) {
         Column(
             modifier = Modifier
@@ -153,8 +149,8 @@ private fun EndTripSheet(
                 title = stringResource(R.string.end_trip_title),
                 subtitle = stringResource(R.string.end_trip_subtitle),
                 onCancelClick = onCancelClick,
-                primaryText = modalPrimaryText,
-                secondaryText = modalSecondaryText,
+                primaryText = modalColors.primaryText,
+                secondaryText = modalColors.secondaryText,
             )
 
             uiState.errorMessage?.let {
@@ -167,7 +163,7 @@ private fun EndTripSheet(
 
             Surface(
                 shape = RoundedCornerShape(18.dp),
-                color = modalSurfaceColorAlt,
+                color = modalColors.fieldSurface,
             ) {
                 Column(
                     modifier = Modifier
@@ -178,13 +174,13 @@ private fun EndTripSheet(
                     Text(
                         text = uiState.tripTitle,
                         style = MaterialTheme.typography.labelLarge,
-                        color = modalSecondaryText,
+                        color = modalColors.secondaryText,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = stringResource(R.string.end_trip_started_at, uiState.startOdometerLabel),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = modalPrimaryText,
+                        color = modalColors.primaryText,
                         fontWeight = FontWeight.Medium,
                     )
                 }
@@ -193,9 +189,10 @@ private fun EndTripSheet(
             EndTripDistanceToggle(
                 selectedMode = uiState.distanceInputMode,
                 onModeChange = onDistanceModeChange,
-                primaryText = modalPrimaryText,
-                secondaryText = modalSecondaryText,
-                surfaceColor = modalSurfaceColorAlt,
+                primaryText = modalColors.primaryText,
+                secondaryText = modalColors.secondaryText,
+                surfaceColor = modalColors.toggleContainer,
+                selectedSurfaceColor = modalColors.toggleSelected,
             )
 
             if (uiState.distanceInputMode == DistanceInputMode.ODOMETER) {
@@ -206,11 +203,11 @@ private fun EndTripSheet(
                     placeholder = stringResource(R.string.fuel_entry_odometer_placeholder),
                     filled = true,
                     isError = uiState.odometerError != null,
-                    filledContainerColor = modalSurfaceColorAlt,
-                    filledTextColor = modalPrimaryText,
-                    filledLabelColor = modalSecondaryText,
-                    filledPlaceholderColor = modalFieldPlaceholder,
-                    filledSupportingColor = modalMutedText,
+                    filledContainerColor = modalColors.fieldSurface,
+                    filledTextColor = modalColors.primaryText,
+                    filledLabelColor = modalColors.secondaryText,
+                    filledPlaceholderColor = modalColors.placeholderText,
+                    filledSupportingColor = modalColors.mutedText,
                     filledCursorColor = ForestGlow,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     supportingText = uiState.odometerError,
@@ -223,11 +220,11 @@ private fun EndTripSheet(
                     placeholder = stringResource(R.string.end_trip_trip_meter_placeholder),
                     filled = true,
                     isError = uiState.tripMeterError != null,
-                    filledContainerColor = modalSurfaceColorAlt,
-                    filledTextColor = modalPrimaryText,
-                    filledLabelColor = modalSecondaryText,
-                    filledPlaceholderColor = modalFieldPlaceholder,
-                    filledSupportingColor = modalMutedText,
+                    filledContainerColor = modalColors.fieldSurface,
+                    filledTextColor = modalColors.primaryText,
+                    filledLabelColor = modalColors.secondaryText,
+                    filledPlaceholderColor = modalColors.placeholderText,
+                    filledSupportingColor = modalColors.mutedText,
                     filledCursorColor = ForestGlow,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     supportingText = uiState.tripMeterError,
@@ -240,11 +237,11 @@ private fun EndTripSheet(
                 label = stringResource(R.string.end_trip_location_label),
                 placeholder = stringResource(R.string.end_trip_location_placeholder),
                 filled = true,
-                filledContainerColor = modalSurfaceColorAlt,
-                filledTextColor = modalPrimaryText,
-                filledLabelColor = modalSecondaryText,
-                filledPlaceholderColor = modalFieldPlaceholder,
-                filledSupportingColor = modalMutedText,
+                filledContainerColor = modalColors.fieldSurface,
+                filledTextColor = modalColors.primaryText,
+                filledLabelColor = modalColors.secondaryText,
+                filledPlaceholderColor = modalColors.placeholderText,
+                filledSupportingColor = modalColors.mutedText,
                 filledCursorColor = ForestGlow,
             )
 
@@ -257,7 +254,7 @@ private fun EndTripSheet(
             Text(
                 text = stringResource(R.string.fuel_entry_discard),
                 style = MaterialTheme.typography.labelLarge,
-                color = modalSecondaryText,
+                color = modalColors.secondaryText,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -313,6 +310,7 @@ private fun EndTripDistanceToggle(
     primaryText: Color,
     secondaryText: Color,
     surfaceColor: Color,
+    selectedSurfaceColor: Color,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -336,6 +334,7 @@ private fun EndTripDistanceToggle(
                     selected = selectedMode == DistanceInputMode.TRIP_METER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    selectedSurfaceColor = selectedSurfaceColor,
                     onClick = { onModeChange(DistanceInputMode.TRIP_METER) },
                 )
                 EndTripModeOption(
@@ -343,6 +342,7 @@ private fun EndTripDistanceToggle(
                     selected = selectedMode == DistanceInputMode.ODOMETER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    selectedSurfaceColor = selectedSurfaceColor,
                     onClick = { onModeChange(DistanceInputMode.ODOMETER) },
                 )
             }
@@ -356,12 +356,13 @@ private fun EndTripModeOption(
     selected: Boolean,
     primaryText: Color,
     secondaryText: Color,
+    selectedSurfaceColor: Color,
     onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) Color.White.copy(alpha = 0.88f) else Color.Transparent,
+        color = if (selected) selectedSurfaceColor else Color.Transparent,
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),

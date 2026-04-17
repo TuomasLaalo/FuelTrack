@@ -42,6 +42,7 @@ import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.ui.theme.Forest
 import com.laatu.fueltank.ui.theme.ForestGlow
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
+import com.laatu.fueltank.ui.theme.rememberFuelTrackModalColors
 
 @Composable
 fun StartTripRoute(
@@ -124,17 +125,12 @@ private fun StartTripSheet(
     onStartClick: () -> Unit,
 ) {
     val spacing = LocalFuelTankSpacing.current
-    val modalBackgroundColor = MaterialTheme.colorScheme.background
-    val modalSurfaceColorAlt = Color(0xFFE2E6E0)
-    val modalPrimaryText = Color(0xFF17352D)
-    val modalSecondaryText = Color(0xFF305A4E)
-    val modalMutedText = Color(0xFF3E6D60)
-    val modalFieldPlaceholder = Color(0xFF64736F)
+    val modalColors = rememberFuelTrackModalColors(modalStyle = true)
 
     Surface(
         modifier = modifier.fillMaxSize(),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        color = modalBackgroundColor,
+        color = modalColors.background,
     ) {
         if (uiState.isLoading) {
             Box(
@@ -157,8 +153,8 @@ private fun StartTripSheet(
                 title = stringResource(R.string.start_trip_title),
                 subtitle = stringResource(R.string.start_trip_subtitle),
                 onCancelClick = onCancelClick,
-                primaryText = modalPrimaryText,
-                secondaryText = modalSecondaryText,
+                primaryText = modalColors.primaryText,
+                secondaryText = modalColors.secondaryText,
             )
 
             if (uiState.errorMessage != null) {
@@ -171,7 +167,7 @@ private fun StartTripSheet(
 
             Surface(
                 shape = RoundedCornerShape(18.dp),
-                color = modalSurfaceColorAlt,
+                color = modalColors.fieldSurface,
             ) {
                 Column(
                     modifier = Modifier
@@ -182,13 +178,13 @@ private fun StartTripSheet(
                     Text(
                         text = stringResource(R.string.start_trip_start_point),
                         style = MaterialTheme.typography.labelLarge,
-                        color = modalSecondaryText,
+                        color = modalColors.secondaryText,
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
                         text = stringResource(R.string.start_trip_starting_odometer, uiState.currentOdometerLabel),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = modalPrimaryText,
+                        color = modalColors.primaryText,
                         fontWeight = FontWeight.Medium,
                     )
                 }
@@ -200,11 +196,11 @@ private fun StartTripSheet(
                 label = stringResource(R.string.start_trip_title_label),
                 placeholder = stringResource(R.string.start_trip_title_placeholder),
                 filled = true,
-                filledContainerColor = modalSurfaceColorAlt,
-                filledTextColor = modalPrimaryText,
-                filledLabelColor = modalSecondaryText,
-                filledPlaceholderColor = modalFieldPlaceholder,
-                filledSupportingColor = modalMutedText,
+                filledContainerColor = modalColors.fieldSurface,
+                filledTextColor = modalColors.primaryText,
+                filledLabelColor = modalColors.secondaryText,
+                filledPlaceholderColor = modalColors.placeholderText,
+                filledSupportingColor = modalColors.mutedText,
                 filledCursorColor = ForestGlow,
             )
 
@@ -214,11 +210,11 @@ private fun StartTripSheet(
                 label = stringResource(R.string.start_trip_location_label),
                 placeholder = stringResource(R.string.start_trip_location_placeholder),
                 filled = true,
-                filledContainerColor = modalSurfaceColorAlt,
-                filledTextColor = modalPrimaryText,
-                filledLabelColor = modalSecondaryText,
-                filledPlaceholderColor = modalFieldPlaceholder,
-                filledSupportingColor = modalMutedText,
+                filledContainerColor = modalColors.fieldSurface,
+                filledTextColor = modalColors.primaryText,
+                filledLabelColor = modalColors.secondaryText,
+                filledPlaceholderColor = modalColors.placeholderText,
+                filledSupportingColor = modalColors.mutedText,
                 filledCursorColor = ForestGlow,
             )
 
@@ -231,7 +227,7 @@ private fun StartTripSheet(
             Text(
                 text = stringResource(R.string.fuel_entry_discard),
                 style = MaterialTheme.typography.labelLarge,
-                color = modalSecondaryText,
+                color = modalColors.secondaryText,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)

@@ -360,7 +360,7 @@ private fun TripHeaderActionButton(
                     .offset(x = 4.dp, y = (-4).dp)
                     .size(12.dp)
                     .background(
-                        color = Color(0xFFF5FBF7),
+                        color = MaterialTheme.colorScheme.surfaceBright,
                         shape = RoundedCornerShape(999.dp),
                     )
                     .border(
@@ -419,7 +419,7 @@ private fun HeroMetricCard(
             Text(
                 text = stringResource(R.string.dashboard_average_consumption),
                 style = MaterialTheme.typography.titleMedium,
-                color = Color.White.copy(alpha = 0.9f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                 fontWeight = FontWeight.SemiBold,
             )
             Row(
@@ -429,23 +429,23 @@ private fun HeroMetricCard(
                 Text(
                     text = value,
                     style = MaterialTheme.typography.headlineLarge,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
                 Text(
                     text = unit,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White.copy(alpha = 0.92f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.92f),
                     modifier = Modifier.padding(bottom = 5.dp),
                 )
             }
             Surface(
                 shape = RoundedCornerShape(999.dp),
-                color = Color.White.copy(alpha = 0.16f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.16f),
             ) {
                 Text(
                     text = trend,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
                 )
             }

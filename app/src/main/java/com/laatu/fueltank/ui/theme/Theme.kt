@@ -47,6 +47,15 @@ private val LightColorScheme = lightColorScheme(
 
 object ColorTokens {
     val LightSurfaceContainer = Color(0xFFF0EDE9)
+    val LightModalFieldSurface = Color(0xFFE2E6E0)
+    val LightModalPrimaryText = Color(0xFF17352D)
+    val LightModalSecondaryText = Color(0xFF305A4E)
+    val LightModalMutedText = Color(0xFF3E6D60)
+    val LightModalPlaceholderText = Color(0xFF64736F)
+    val LightModalToggleContainer = Color(0xFFD1DDD7)
+    val LightModalToggleSelected = Color(0xFFF5FBF7)
+    val LightModalSwitchThumb = Color(0xFFE3E8E5)
+    val LightModalSwitchTrack = Color(0xFFAAB7B1)
     val DarkSurface = Color(0xFF161C19)
     val DarkSurfaceContainer = Color(0xFF1E2622)
     val DarkSurfaceContainerLow = Color(0xFF1A221E)

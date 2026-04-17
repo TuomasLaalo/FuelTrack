@@ -386,7 +386,7 @@ private fun TripHistoryCard(
                 }
                 Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = if (item.isActive) Color(0xFFD9EEE4) else MaterialTheme.colorScheme.surfaceContainerLow,
+                    color = if (item.isActive) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerLow,
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

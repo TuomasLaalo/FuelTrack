@@ -48,6 +48,7 @@ import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.ui.theme.Forest
 import com.laatu.fueltank.ui.theme.ForestGlow
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
+import com.laatu.fueltank.ui.theme.rememberFuelTrackModalColors
 
 @Composable
 fun FuelEntryFormContent(
@@ -77,21 +78,12 @@ fun FuelEntryFormContent(
     val hasComputedTotal =
         uiState.form.liters.parseLocalizedDecimal()?.let { it > 0.0 } == true &&
             uiState.form.pricePerLiter.parseLocalizedDecimal()?.let { it > 0.0 } == true
-    val modalBackgroundColor = MaterialTheme.colorScheme.background
-    val modalSurfaceColor = if (modalStyle) Color(0xFF86C2AB) else MaterialTheme.colorScheme.surfaceContainerLow
-    val modalSurfaceColorAlt = if (modalStyle) Color(0xFFE2E6E0) else MaterialTheme.colorScheme.surfaceContainerLowest
-    val modalPrimaryText = if (modalStyle) Color(0xFF17352D) else MaterialTheme.colorScheme.onSurface
-    val modalSecondaryText = if (modalStyle) Color(0xFF305A4E) else MaterialTheme.colorScheme.onSurfaceVariant
-    val modalMutedText = if (modalStyle) Color(0xFF3E6D60) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.82f)
-    val modalFieldPlaceholder = if (modalStyle) Color(0xFF5B8478) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-    val modalToggleBase = if (modalStyle) Color(0xFF82C4AA) else MaterialTheme.colorScheme.surface.copy(alpha = 0.55f)
-    val modalToggleActive = if (modalStyle) Color(0xFFEDF7F2) else MaterialTheme.colorScheme.surface
-    val modalSwitchUnchecked = if (modalStyle) Color(0xFF4A6C61) else MaterialTheme.colorScheme.surfaceContainerHighest
+    val modalColors = rememberFuelTrackModalColors(modalStyle = modalStyle)
 
     Surface(
         modifier = modifier.fillMaxSize(),
         shape = if (modalStyle) RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp) else RoundedCornerShape(0.dp),
-        color = modalBackgroundColor,
+        color = modalColors.background,
     ) {
         Column(
             modifier = Modifier
@@ -105,8 +97,8 @@ fun FuelEntryFormContent(
                 subtitle = subtitle,
                 showCancelText = modalStyle,
                 onCancelClick = onCancelClick,
-                primaryText = modalPrimaryText,
-                secondaryText = modalSecondaryText,
+                primaryText = modalColors.primaryText,
+                secondaryText = modalColors.secondaryText,
             )
 
             uiState.form.generalError?.let { ErrorCard(message = it) }
@@ -114,9 +106,10 @@ fun FuelEntryFormContent(
             DistanceModeToggle(
                 selectedMode = uiState.form.distanceInputMode,
                 onModeChange = onDistanceModeChange,
-                primaryText = modalPrimaryText,
-                secondaryText = modalSecondaryText,
-                surfaceColor = modalSurfaceColorAlt,
+                primaryText = modalColors.primaryText,
+                secondaryText = modalColors.secondaryText,
+                surfaceColor = modalColors.toggleContainer,
+                selectedSurfaceColor = modalColors.toggleSelected,
             )
 
             if (uiState.form.distanceInputMode == DistanceInputMode.TRIP_METER) {
@@ -127,11 +120,11 @@ fun FuelEntryFormContent(
                     placeholder = stringResource(R.string.fuel_entry_trip_meter_placeholder),
                     filled = true,
                     isError = uiState.form.tripMeterError != null,
-                    filledContainerColor = modalSurfaceColorAlt,
-                    filledTextColor = modalPrimaryText,
-                    filledLabelColor = modalSecondaryText,
-                    filledPlaceholderColor = modalFieldPlaceholder,
-                    filledSupportingColor = modalMutedText,
+                    filledContainerColor = modalColors.fieldSurface,
+                    filledTextColor = modalColors.primaryText,
+                    filledLabelColor = modalColors.secondaryText,
+                    filledPlaceholderColor = modalColors.placeholderText,
+                    filledSupportingColor = modalColors.mutedText,
                     filledCursorColor = ForestGlow,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     supportingText = uiState.form.tripMeterError,
@@ -141,7 +134,7 @@ fun FuelEntryFormContent(
                         Text(
                             text = stringResource(R.string.fuel_entry_baseline_odometer, baseline),
                             style = MaterialTheme.typography.bodySmall,
-                            color = modalMutedText,
+                            color = modalColors.mutedText,
                             modifier = Modifier.padding(start = 4.dp),
                         )
                     }
@@ -154,11 +147,11 @@ fun FuelEntryFormContent(
                     placeholder = stringResource(R.string.fuel_entry_odometer_placeholder),
                     filled = true,
                     isError = uiState.form.odometerError != null,
-                    filledContainerColor = modalSurfaceColorAlt,
-                    filledTextColor = modalPrimaryText,
-                    filledLabelColor = modalSecondaryText,
-                    filledPlaceholderColor = modalFieldPlaceholder,
-                    filledSupportingColor = modalMutedText,
+                    filledContainerColor = modalColors.fieldSurface,
+                    filledTextColor = modalColors.primaryText,
+                    filledLabelColor = modalColors.secondaryText,
+                    filledPlaceholderColor = modalColors.placeholderText,
+                    filledSupportingColor = modalColors.mutedText,
                     filledCursorColor = ForestGlow,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     supportingText = uiState.form.odometerError,
@@ -167,9 +160,9 @@ fun FuelEntryFormContent(
 
             CompactPurchaseCard(
                 modalStyle = modalStyle,
-                fieldSurface = modalSurfaceColorAlt,
-                primaryText = modalPrimaryText,
-                secondaryText = modalSecondaryText,
+                fieldSurface = modalColors.fieldSurface,
+                primaryText = modalColors.primaryText,
+                secondaryText = modalColors.secondaryText,
                 pricePerUnit = uiState.form.pricePerLiter,
                 quantity = uiState.form.liters,
                 totalPriceLabel = uiState.computedTotalPriceLabel,
@@ -186,11 +179,11 @@ fun FuelEntryFormContent(
                 label = stringResource(R.string.fuel_entry_station),
                 placeholder = stringResource(R.string.fuel_entry_station_placeholder),
                 filled = true,
-                filledContainerColor = modalSurfaceColorAlt,
-                filledTextColor = modalPrimaryText,
-                filledLabelColor = modalSecondaryText,
-                filledPlaceholderColor = modalFieldPlaceholder,
-                filledSupportingColor = modalMutedText,
+                filledContainerColor = modalColors.fieldSurface,
+                filledTextColor = modalColors.primaryText,
+                filledLabelColor = modalColors.secondaryText,
+                filledPlaceholderColor = modalColors.placeholderText,
+                filledSupportingColor = modalColors.mutedText,
                 filledCursorColor = ForestGlow,
             )
 
@@ -199,6 +192,7 @@ fun FuelEntryFormContent(
                 title = stringResource(R.string.fuel_entry_full_tank_refill),
                 checked = uiState.form.isFullTank,
                 onCheckedChange = onFullTankChange,
+                colors = modalColors,
             )
 
             if (showTripAttachment && uiState.activeTripId != null) {
@@ -210,12 +204,13 @@ fun FuelEntryFormContent(
                     } ?: stringResource(R.string.fuel_entry_attach_active_trip),
                     checked = uiState.form.attachToActiveTrip,
                     onCheckedChange = onAttachToActiveTripChange,
+                    colors = modalColors,
                 )
             }
 
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = modalSurfaceColorAlt,
+                color = modalColors.fieldSurface,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showNoteField = !showNoteField },
@@ -234,13 +229,13 @@ fun FuelEntryFormContent(
                             stringResource(R.string.fuel_entry_edit_note)
                         },
                         style = MaterialTheme.typography.bodySmall,
-                        color = modalSecondaryText,
+                        color = modalColors.secondaryText,
                         fontWeight = FontWeight.Medium,
                     )
                     Icon(
                         imageVector = Icons.Outlined.ExpandMore,
                         contentDescription = null,
-                        tint = modalSecondaryText.copy(alpha = 0.8f),
+                        tint = modalColors.secondaryText.copy(alpha = 0.8f),
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -254,11 +249,11 @@ fun FuelEntryFormContent(
                     singleLine = false,
                     placeholder = stringResource(R.string.fuel_entry_note_placeholder),
                     filled = true,
-                    filledContainerColor = modalSurfaceColorAlt,
-                    filledTextColor = modalPrimaryText,
-                    filledLabelColor = modalSecondaryText,
-                    filledPlaceholderColor = modalFieldPlaceholder,
-                    filledSupportingColor = modalMutedText,
+                    filledContainerColor = modalColors.fieldSurface,
+                    filledTextColor = modalColors.primaryText,
+                    filledLabelColor = modalColors.secondaryText,
+                    filledPlaceholderColor = modalColors.placeholderText,
+                    filledSupportingColor = modalColors.mutedText,
                     filledCursorColor = ForestGlow,
                 )
             }
@@ -273,7 +268,7 @@ fun FuelEntryFormContent(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelLarge,
-                    color = modalSecondaryText,
+                    color = modalColors.secondaryText,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -337,6 +332,7 @@ private fun DistanceModeToggle(
     primaryText: Color = MaterialTheme.colorScheme.onSurface,
     secondaryText: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     surfaceColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    selectedSurfaceColor: Color = MaterialTheme.colorScheme.surface,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -360,6 +356,7 @@ private fun DistanceModeToggle(
                     selected = selectedMode == DistanceInputMode.TRIP_METER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    selectedSurfaceColor = selectedSurfaceColor,
                     onClick = { onModeChange(DistanceInputMode.TRIP_METER) },
                 )
                 SegmentedModeOption(
@@ -367,6 +364,7 @@ private fun DistanceModeToggle(
                     selected = selectedMode == DistanceInputMode.ODOMETER,
                     primaryText = primaryText,
                     secondaryText = secondaryText,
+                    selectedSurfaceColor = selectedSurfaceColor,
                     onClick = { onModeChange(DistanceInputMode.ODOMETER) },
                 )
             }
@@ -380,12 +378,13 @@ private fun SegmentedModeOption(
     selected: Boolean,
     primaryText: Color,
     secondaryText: Color,
+    selectedSurfaceColor: Color,
     onClick: () -> Unit,
 ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) Color.White.copy(alpha = 0.88f) else Color.Transparent,
+        color = if (selected) selectedSurfaceColor else Color.Transparent,
     ) {
         Box(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
@@ -490,10 +489,9 @@ private fun InlineSwitchRow(
     title: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    colors: com.laatu.fueltank.ui.theme.FuelTrackModalColors,
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
-    val primaryText = if (modalStyle) Color(0xFF17352D) else MaterialTheme.colorScheme.onSurface
-    val secondaryText = if (modalStyle) Color(0xFF305A4E) else MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         modifier = Modifier.padding(horizontal = 2.dp, vertical = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -503,14 +501,14 @@ private fun InlineSwitchRow(
             Icon(
                 imageVector = it,
                 contentDescription = null,
-                tint = secondaryText,
+                tint = colors.secondaryText,
                 modifier = Modifier.size(16.dp),
             )
         }
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
-            color = primaryText,
+            color = colors.primaryText,
         )
         Switch(
             checked = checked,
@@ -520,11 +518,11 @@ private fun InlineSwitchRow(
                 scaleY = 0.76f,
             ),
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color(0xFFF5FBF7),
-                checkedTrackColor = Color(0xFF4BA77E),
-                uncheckedThumbColor = if (modalStyle) Color(0xFFE3E8E5) else MaterialTheme.colorScheme.surface,
-                uncheckedTrackColor = if (modalStyle) Color(0xFFAAB7B1) else MaterialTheme.colorScheme.surfaceContainerHighest,
-                uncheckedBorderColor = if (modalStyle) Color.Transparent else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+                checkedThumbColor = colors.switchCheckedThumb,
+                checkedTrackColor = colors.switchCheckedTrack,
+                uncheckedThumbColor = colors.switchUncheckedThumb,
+                uncheckedTrackColor = colors.switchUncheckedTrack,
+                uncheckedBorderColor = Color.Transparent,
             ),
         )
     }
