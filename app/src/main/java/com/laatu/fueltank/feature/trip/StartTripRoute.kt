@@ -31,12 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.laatu.fueltank.R
+import com.laatu.fueltank.core.ui.UiTestTags
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.ui.theme.Forest
@@ -165,36 +167,12 @@ private fun StartTripSheet(
                 )
             }
 
-            Surface(
-                shape = RoundedCornerShape(18.dp),
-                color = modalColors.fieldSurface,
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.start_trip_start_point),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = modalColors.secondaryText,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = stringResource(R.string.start_trip_starting_odometer, uiState.currentOdometerLabel),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = modalColors.primaryText,
-                        fontWeight = FontWeight.Medium,
-                    )
-                }
-            }
-
             FormField(
                 value = uiState.title,
                 onValueChange = onTitleChange,
                 label = stringResource(R.string.start_trip_title_label),
                 placeholder = stringResource(R.string.start_trip_title_placeholder),
+                modifier = Modifier.testTag(UiTestTags.StartTripTitle),
                 filled = true,
                 filledContainerColor = modalColors.fieldSurface,
                 filledTextColor = modalColors.primaryText,
@@ -209,6 +187,7 @@ private fun StartTripSheet(
                 onValueChange = onStartLocationChange,
                 label = stringResource(R.string.start_trip_location_label),
                 placeholder = stringResource(R.string.start_trip_location_placeholder),
+                modifier = Modifier.testTag(UiTestTags.StartTripLocation),
                 filled = true,
                 filledContainerColor = modalColors.fieldSurface,
                 filledTextColor = modalColors.primaryText,
@@ -290,6 +269,7 @@ private fun StartTripPrimaryButton(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(UiTestTags.StartTripSave)
             .clip(RoundedCornerShape(18.dp))
             .background(gradient),
         colors = ButtonDefaults.buttonColors(

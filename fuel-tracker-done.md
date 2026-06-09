@@ -66,3 +66,64 @@ Use this file to track completed work. Move items here from the backlog when the
 - Audited the newer Compose UI for hardcoded colors and moved the modal add/start/end trip palette into a shared theme-level `FuelTrackModalColors` helper
 - Replaced remaining one-off active-state and hero-card colors in Dashboard, Trips, and Trip Summary with theme-driven colors so future dark-theme work is centralized instead of screen-local
 - Verified the theme-readiness checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+
+### 2026-04-26
+
+- Added minimal Trip time tracking with persisted trip breaks, manual break correction, trip start/end time editing, domain-level elapsed/break/driving time calculations, average speed including/excluding breaks, and a chronological trip timeline
+- Added localized English and Finnish Trip Summary UI for the time split, break actions, break editing, and timeline
+- Added Room schema version 3 with a `trip_breaks` table and migration from version 2
+- Added trip time summary and break validation unit coverage, and verified the checkpoint with successful `testDebugUnitTest`
+
+### 2026-05-03
+
+- Separated purchase-based trip fuel ratio from actual trip average consumption so linked refuels are no longer presented as fuel used
+- Updated Trip Summary hero copy to label purchase-based values explicitly, hide misleading ratios, and explain the limitation with subtle helper text
+- Updated trip summary calculation tests and verified the checkpoint with successful `assembleDebug` and `testDebugUnitTest`
+- Extracted shared dialog action rows for Save/Cancel, Delete/Cancel, and Save/Delete/Cancel flows into core UI components, then reused them in Trips, Trip Summary, and confirmation dialogs
+- Verified the dialog-action refactor with successful `assembleDebug` and `testDebugUnitTest`
+- Split the large Trip Summary route file into focused Compose files for route/dialog orchestration, header/actions, hero, time card, timeline, linked refuels, and date-time picker controls
+- Verified the Trip Summary split with successful `assembleDebug` and `testDebugUnitTest`
+- Extracted Trip Summary dialogs into a dedicated sibling file and removed the unused Trip Summary route callback from navigation
+- Verified the cleanup with successful `assembleDebug` and `testDebugUnitTest`
+- Added a shared `CompactSectionHeader` core UI component and replaced the local Trip Summary section-header duplicate with it
+- Verified the shared compact section header cleanup with successful `assembleDebug` and `testDebugUnitTest`
+- Extracted Trip Summary domain-to-UI mapping into an injectable `TripSummaryUiMapper`, leaving the ViewModel focused on state flows and user actions
+- Verified the mapper refactor with successful `assembleDebug` and `testDebugUnitTest`
+- Localized remaining Car Setup and Edit Fuel Entry screen copy and validation messages through English/Finnish string resources
+- Verified the localization cleanup with successful `assembleDebug` and `testDebugUnitTest`
+- Added Room migration test infrastructure and instrumentation coverage for database migrations from v1 to v2 and v2 to v3
+- Verified migration coverage with successful `compileDebugAndroidTestKotlin`, filtered `connectedDebugAndroidTest`, and the regular `assembleDebug` plus `testDebugUnitTest` checkpoint
+- Added a testable string-resource abstraction, bound it to the Android implementation through Hilt, and introduced the first ViewModel unit tests for car setup validation and save events
+- Verified the ViewModel test coverage checkpoint with successful `assembleDebug`, `testDebugUnitTest`, and `compileDebugAndroidTestKotlin`
+- Added Add Fuel Entry ViewModel tests for missing-car handling, localized validation errors, trip-meter odometer derivation, active-trip attachment, direct odometer mode, and persisted unit conversion
+- Reused a shared test string-resource provider for ViewModel tests and verified the checkpoint with successful `assembleDebug`, `testDebugUnitTest`, and `compileDebugAndroidTestKotlin`
+- Added remaining ViewModel coverage gaps to the post-review hardening backlog for edit fuel entry, start/end trip, and trip summary break actions
+- Split the oversized Dashboard route file into route orchestration, header, cards, and language-dialog files while preserving existing dashboard behavior
+- Verified the Dashboard split with successful `assembleDebug`, `testDebugUnitTest`, and `compileDebugAndroidTestKotlin`
+- Added Edit Fuel Entry ViewModel tests for loading existing entries, baseline selection, localized validation errors, successful update mutation, dependent trip-meter recalculation, persisted unit conversion, and typed mutation-error UI mapping
+- Verified the edit fuel entry ViewModel coverage with successful `assembleDebug`, `testDebugUnitTest`, and `compileDebugAndroidTestKotlin`
+- Added edit-screen fuel-entry deletion using the Trip Summary destructive dialog style, routed deletion through `DeleteFuelEntryUseCase`, and covered the recalculation/delete event path in Edit Fuel Entry ViewModel tests
+- Verified the edit delete checkpoint with successful `assembleDebug`, `testDebugUnitTest`, and `compileDebugAndroidTestKotlin`
+- Added Room DAO instrumentation tests for car, fuel entry, trip, trip break, chronological ordering, active-trip/active-break queries, and trip-to-refuel/trip-break foreign-key behavior
+- Added Room-backed repository instrumentation tests for domain mapping, fuel-entry mutation transactions, trip active lookup, and trip-break update/delete behavior
+- Updated the test plan status to reflect the current automated coverage and verified the persistence test checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, and full `connectedDebugAndroidTest`
+- Added Start Trip, End Trip, and Trip Summary ViewModel tests for validation, active-trip handling, derived odometer behavior, break actions, trip time correction errors, delete flow, and save/end events
+- Updated the test plan/backlog to close the ViewModel coverage item and verified the checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, and full `connectedDebugAndroidTest`
+- Added the first Compose interaction instrumentation test for clean app onboarding, car creation, dashboard entry, and opening the add-refuel sheet
+- Updated AndroidX test dependencies to `androidx.test:core:1.7.0`, `androidx.test.ext:junit:1.3.0`, and `espresso-core:3.7.0` to avoid the emulator `InputManager.getInstance` Espresso compatibility failure
+- Verified the UI/system test checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, and full `connectedDebugAndroidTest` with 12 connected tests
+
+### 2026-05-05
+
+- Expanded the Compose interaction instrumentation flow to cover fuel entry save, history navigation, edit, and edit-screen delete confirmation against the real app stack
+- Added shared test tags for fuel-entry fields/actions, fuel-history row actions, and destructive dialog confirmation so future UI tests can use stable selectors instead of visible copy
+- Updated the UI/system test backlog to close the fuel-entry save/edit/delete item and verified the checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, and full `connectedDebugAndroidTest` with 12 connected tests
+- Expanded the same Compose interaction flow to cover trip start, active trip summary navigation, end-trip confirmation, ending trip by trip meter distance, and completed trip summary display
+- Added shared test tags for dashboard trip start, start/end trip fields, trip summary end action, and end-trip sheet controls
+- Updated the UI/system test backlog to close the trip start/end item and verified the checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, and full `connectedDebugAndroidTest` with 12 connected tests
+- Expanded the Compose interaction flow to cover active-trip break correction by starting a break, ending it, opening the timeline break editor, saving the correction dialog, and deleting the break through confirmation
+- Added localization-switching UI coverage through the dashboard language menu and verified that selecting Finnish updates visible dashboard copy
+- Updated the UI/system test backlog to close break correction and localization switching, leaving only manual release acceptance, and verified the checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, and full `connectedDebugAndroidTest` with 12 connected tests
+- Fixed actual-device polish findings by making ViewModel-owned strings follow the selected app locale immediately, refining dark-theme containers/hero gradients away from default purple, tightening the active-break button layout, moving break-edit cancel to the dialog header, and adding trip distance to the hero route line
+- Required a nonblank start location when starting a trip so newly created trips do not persist a null start location through the normal UI flow
+- Added a backlog item for post-trip refuel linking and verified the checkpoint with successful `assembleDebug`, `testDebugUnitTest`, `compileDebugAndroidTestKotlin`, targeted app-flow instrumentation, and full `connectedDebugAndroidTest` with 12 connected tests

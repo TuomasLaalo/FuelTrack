@@ -41,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.laatu.fueltank.R
+import com.laatu.fueltank.core.ui.UiTestTags
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 import com.laatu.fueltank.ui.theme.LocalFuelTankSpacing
@@ -82,6 +84,7 @@ fun FuelHistoryRoute(
             message = stringResource(R.string.fuel_history_delete_message),
             confirmLabel = stringResource(R.string.common_delete),
             dismissLabel = stringResource(R.string.common_cancel),
+            destructiveConfirm = true,
             onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::dismissDeleteDialog,
         )
@@ -180,7 +183,10 @@ private fun FuelHistoryHeader(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            IconButton(onClick = onNavigateBack) {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.testTag(UiTestTags.FuelHistoryBack),
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                     contentDescription = stringResource(R.string.common_back),
@@ -318,7 +324,9 @@ private fun RefuelHistoryCard(
     var menuExpanded by rememberSaveable(entry.id) { mutableStateOf(false) }
 
     Card(
-        modifier = Modifier.padding(bottom = 10.dp),
+        modifier = Modifier
+            .padding(bottom = 10.dp)
+            .testTag(UiTestTags.FuelHistoryEntry),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -365,7 +373,9 @@ private fun RefuelHistoryCard(
                     Box {
                         IconButton(
                             onClick = { menuExpanded = true },
-                            modifier = Modifier.size(22.dp),
+                            modifier = Modifier
+                                .size(22.dp)
+                                .testTag(UiTestTags.FuelHistoryEntryMoreActions),
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.MoreVert,
@@ -381,12 +391,14 @@ private fun RefuelHistoryCard(
                         ) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.common_edit)) },
+                                modifier = Modifier.testTag(UiTestTags.FuelHistoryEntryEdit),
                                 onClick = {
                                     menuExpanded = false
                                     onEditClick()
                                 },
                             )
                             DropdownMenuItem(
+                                modifier = Modifier.testTag(UiTestTags.FuelHistoryEntryDelete),
                                 text = {
                                         Text(
                                             text = stringResource(R.string.common_delete),

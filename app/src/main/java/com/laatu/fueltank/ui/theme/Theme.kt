@@ -10,15 +10,20 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = ForestGlow,
+    primaryContainer = DeepTeal,
     secondary = Apricot,
+    secondaryContainer = ColorTokens.DarkSecondaryContainer,
     background = NightInk,
     surface = ColorTokens.DarkSurface,
     surfaceContainer = ColorTokens.DarkSurfaceContainer,
     surfaceContainerLow = ColorTokens.DarkSurfaceContainerLow,
     surfaceContainerHigh = ColorTokens.DarkSurfaceContainerHigh,
     surfaceContainerLowest = ColorTokens.DarkSurfaceContainerLowest,
+    surfaceBright = ColorTokens.DarkSurfaceBright,
     onPrimary = NightInk,
+    onPrimaryContainer = ColorTokens.DarkOnPrimaryContainer,
     onSecondary = NightInk,
+    onSecondaryContainer = ColorTokens.DarkOnSurfaceVariant,
     onBackground = WarmSurface,
     onSurface = WarmSurface,
     onSurfaceVariant = ColorTokens.DarkOnSurfaceVariant,
@@ -56,12 +61,15 @@ object ColorTokens {
     val LightModalToggleSelected = Color(0xFFF5FBF7)
     val LightModalSwitchThumb = Color(0xFFE3E8E5)
     val LightModalSwitchTrack = Color(0xFFAAB7B1)
-    val DarkSurface = Color(0xFF161C19)
-    val DarkSurfaceContainer = Color(0xFF1E2622)
-    val DarkSurfaceContainerLow = Color(0xFF1A221E)
-    val DarkSurfaceContainerHigh = Color(0xFF27312C)
-    val DarkSurfaceContainerLowest = Color(0xFF222B26)
-    val DarkOnSurfaceVariant = Color(0xFFB7C0BA)
+    val DarkSurface = Color(0xFF18211C)
+    val DarkSurfaceContainer = Color(0xFF202B25)
+    val DarkSurfaceContainerLow = Color(0xFF1B251F)
+    val DarkSurfaceContainerHigh = Color(0xFF2A362F)
+    val DarkSurfaceContainerLowest = Color(0xFF233028)
+    val DarkSurfaceBright = Color(0xFF2E3A33)
+    val DarkSecondaryContainer = Color(0xFF334A42)
+    val DarkOnPrimaryContainer = Color(0xFFE8FFF4)
+    val DarkOnSurfaceVariant = Color(0xFFC4CEC7)
 }
 
 @Composable

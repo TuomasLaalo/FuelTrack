@@ -18,16 +18,19 @@ import com.laatu.fueltank.domain.usecase.BuildDashboardStatsUseCase
 import com.laatu.fueltank.domain.usecase.ObservePrimaryCarUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.text.DecimalFormat
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
@@ -54,8 +57,9 @@ class DashboardViewModel @Inject constructor(
                     fuelEntryRepository.observeEntriesForCar(car.id),
                     tripRepository.observeTripsForCar(car.id),
                     appLanguageManager.currentLanguage,
-                ) { activeCar, entries, trips, language ->
-                    toUiState(activeCar, entries, trips, language)
+                    minuteTicker,
+                ) { activeCar, entries, trips, language, now ->
+                    toUiState(activeCar, entries, trips, language, now)
                 }
             }
         }
@@ -74,6 +78,7 @@ class DashboardViewModel @Inject constructor(
         entries: List<FuelEntry>,
         trips: List<Trip>,
         currentLanguage: AppLanguage,
+        nowEpochMillis: Long,
     ): DashboardUiState {
         val currentOdometer = currentOdometerService.resolve(car, entries, trips)
         val stats = buildDashboardStatsUseCase(entries)
@@ -101,7 +106,7 @@ class DashboardViewModel @Inject constructor(
                 CalculationConfidence.NOT_AVAILABLE -> stringResourceProvider.get(R.string.dashboard_unlock_reliable_consumption)
             },
             currentLanguage = currentLanguage,
-            activeTrip = activeTrip?.toUiModel(stringResourceProvider),
+            activeTrip = activeTrip?.toUiModel(stringResourceProvider, nowEpochMillis),
             latestRefuel = latestEntry?.toLatestRefuelCard(stringResourceProvider, locale),
             utilityCard = DashboardUtilityUiModel(
                 title = "",
@@ -131,7 +136,8 @@ data class DashboardUiState(
 data class DashboardActiveTripUiModel(
     val id: Long,
     val title: String,
-    val subtitle: String,
+    val locationLabel: String,
+    val elapsedLabel: String,
 )
 
 data class DashboardLatestRefuelUiModel(
@@ -176,12 +182,34 @@ private fun Long.toLitersString(): String = "${decimalFormat.format(this / 1000.
 
 private fun Trip.toUiModel(
     stringResourceProvider: StringResourceProvider,
+    nowEpochMillis: Long,
 ): DashboardActiveTripUiModel = DashboardActiveTripUiModel(
     id = id,
     title = title ?: stringResourceProvider.get(R.string.dashboard_active_trip_default_title),
-    subtitle = stringResourceProvider.get(
-        R.string.dashboard_active_trip_subtitle,
-        startLocation ?: stringResourceProvider.get(R.string.dashboard_no_start_location),
-        startOdometerKm,
+    locationLabel = startLocation ?: stringResourceProvider.get(R.string.dashboard_no_start_location),
+    elapsedLabel = stringResourceProvider.get(
+        R.string.dashboard_active_trip_elapsed,
+        formatTripElapsed((nowEpochMillis - startTimeEpochMillis).coerceAtLeast(0L), stringResourceProvider),
     ),
 )
+
+private fun formatTripElapsed(
+    durationMillis: Long,
+    stringResourceProvider: StringResourceProvider,
+): String {
+    val duration = Duration.ofMillis(durationMillis)
+    val hours = duration.toHours()
+    val minutes = duration.minusHours(hours).toMinutes()
+    return if (hours > 0) {
+        stringResourceProvider.get(R.string.trip_summary_duration_hours_minutes, hours, minutes)
+    } else {
+        stringResourceProvider.get(R.string.trip_summary_duration_minutes, minutes)
+    }
+}
+
+private val minuteTicker = flow {
+    while (true) {
+        emit(System.currentTimeMillis())
+        delay(60_000L)
+    }
+}

@@ -235,18 +235,58 @@ This file breaks the project into concrete implementation tasks for version 1.
 ### 8.4 Build Trip Summary
 
 - Show trip distance
+- Show start time and end time
+- Show elapsed time, break time, and driving time
+- Show average speed including and excluding breaks when valid distance/time exists
 - Show linked fuel bought
 - Show linked fuel cost
-- Show average consumption only when reliable data exists
+- Show average consumption only when reliable trip-specific full-tank data exists
+- Do not force a trip consumption calculation when no refuels were logged during the trip
+- Do not present fuel bought during the trip as actual fuel used
+- If showing a purchase-based ratio, label it as bought fuel per 100 km, round it conservatively, and hide implausible or misleading values
+- Add subtle info/warning copy explaining that purchase-based values may differ from actual consumption when fuel remains in the tank
 - Show fallback message when reliable consumption is unavailable
+- Show a simple chronological timeline of trip start, breaks, linked fuel entries, and trip end
 
-### 8.5 Add Trip Tests
+### 8.5 Trip Time Tracking
+
+- Add `TripBreak` persistence and repository support
+- Allow starting and ending a break during an active trip
+- Allow manually adding, editing, and deleting breaks afterward
+- Validate break durations and prevent overlapping breaks for the same trip
+- Allow trip start/end times to be corrected after the trip
+- Keep time summary calculations in the domain layer
+
+### 8.6 Add Trip Tests
 
 - Trip with no fuel entries
 - Trip with one linked fuel entry
 - Trip with multiple linked fuel entries
 - Trip with insufficient full-tank data
+- Trip with no linked refuels does not show trip consumption
+- Trip with linked refuels separates fuel bought from actual fuel used
+- Purchase-based trip ratio is hidden when it would be implausible or misleading
 - Trip summary recalculates after fuel-entry edit or delete
+- Trip elapsed time with no breaks
+- Trip elapsed time with one or more breaks
+- Driving time excludes breaks
+- Average speed is calculated including and excluding breaks
+- Invalid or overlapping breaks are rejected
+
+### 8.7 Future Trip Fuel Estimate
+
+- Consider a later optional estimated fuel-use metric for long trips when enough reliable full-tank history exists
+- Base the estimate on the car's reliable long-term average consumption and trip distance, not on trip purchases alone
+- Label the value clearly as an estimate, for example `Estimated fuel use`, and use approximate formatting such as `~52 L`
+- Keep estimated fuel use visually and semantically separate from fuel bought during the trip
+- Do not add manual tank-level estimation unless the product direction changes
+
+### 8.8 Post-Trip Refuel Linking
+
+- Allow adding or linking a fuel entry to a completed trip after the trip has ended
+- Keep the linked entry visible in normal fuel history
+- Recalculate trip summary purchase totals and any reliable trip metrics after post-trip linking or unlinking
+- Keep the UI wording clear that this is attaching a historical refuel to the trip, not changing the trip's start/end time
 
 ## 9. Settings And Localization
 
@@ -334,3 +374,9 @@ The first sprint should focus on:
 Do not delay the persisted-unit decisions or calculation-engine design too long. Those are core structural choices.
 
 Do not treat trip meter as a separate calculation model. It is an input mode layered on top of normalized odometer storage.
+
+## 15. Post-Review Hardening Backlog
+
+### 15.1 Remaining Release Acceptance Coverage
+
+- Add a manual acceptance checklist run for car setup, fuel logging, trip flow, break correction, and localization before release packaging

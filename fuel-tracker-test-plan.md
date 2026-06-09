@@ -34,6 +34,7 @@ Focus first on domain services:
 - `ConsumptionSegmentBuilder`
 - `FuelCalculationService`
 - `TripSummaryService`
+- `TripBreakValidationService`
 
 Critical scenarios:
 
@@ -51,6 +52,12 @@ Critical scenarios:
 - reliable cost per kilometer calculation
 - confidence state is `HIGH_CONFIDENCE`
 - confidence state becomes `NOT_AVAILABLE` when anchor data is missing
+- trip elapsed time with no breaks
+- trip elapsed time with one or more breaks
+- driving time excludes breaks
+- average speed includes and excludes breaks correctly
+- active trips use current time for time summary display
+- invalid or overlapping trip breaks are rejected
 
 ## 4. Repository Tests
 
@@ -75,6 +82,8 @@ Test:
 - trip meter mode derives normalized odometer correctly
 - trip start validation
 - trip end validation
+- trip break start/end state transitions
+- manual trip break add/edit/delete state updates
 - only one active trip allowed
 - recalculation triggered after edit
 - recalculation triggered after delete
@@ -108,6 +117,10 @@ Test:
 ### 6.4 Trip Flow
 
 - Start a trip
+- Start and end a break
+- Add a forgotten break afterward
+- Edit a break start/end time
+- Verify elapsed time, break time, driving time, and timeline update
 - Add one or more linked fuel entries
 - End the trip
 - Verify trip summary values
@@ -146,8 +159,15 @@ A feature is not done until:
 
 ## 9. Test Status
 
-Use this section later to track actual execution.
+### Automated Coverage In Place
 
-### Not Started
+- Domain service and use case unit tests cover reliable fuel calculations, mutation planning, trip summary semantics, trip time calculations, and trip break validation.
+- ViewModel unit tests cover car setup, add fuel entry, edit fuel entry, start trip, end trip, and trip summary validation/state/event paths.
+- Room migration instrumentation tests cover v1 to v2 and v2 to v3 schema upgrades.
+- Room DAO instrumentation tests cover car, fuel entry, trip, trip break, ordering, active-trip/active-break queries, and foreign-key behavior.
+- Repository instrumentation tests cover Room-backed domain mapping, trip/break upserts, active-trip lookup, and fuel-entry mutation transactions.
+- Compose interaction instrumentation tests cover the clean app onboarding path through car creation, dashboard navigation, opening the add-refuel sheet, fuel entry save/edit/delete, trip start/end, break correction, break deletion, and language switching to Finnish.
 
-- No implementation tests yet
+### Remaining
+
+- Add manual acceptance pass for car setup, fuel logging, trip flow, break correction, and localization.

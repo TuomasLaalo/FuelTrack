@@ -5,11 +5,16 @@ import com.laatu.fueltank.domain.model.Car
 import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.domain.model.FuelEntry
 import com.laatu.fueltank.domain.model.Trip
+import com.laatu.fueltank.domain.model.TripBreak
 import com.laatu.fueltank.domain.model.TripStatus
 import com.laatu.fueltank.domain.repository.CarRepository
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
+import com.laatu.fueltank.domain.repository.TripBreakRepository
 import com.laatu.fueltank.domain.repository.TripRepository
 import com.laatu.fueltank.domain.service.CurrentOdometerService
+import com.laatu.fueltank.domain.service.TripBreakMutationError
+import com.laatu.fueltank.domain.service.TripBreakMutationException
+import com.laatu.fueltank.domain.service.TripBreakValidationService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,6 +67,7 @@ class TripUseCasesTest {
         val useCase = EndActiveTripUseCase(
             carRepository = carRepository,
             tripRepository = tripRepository,
+            tripBreakRepository = FakeTripBreakRepository(mutableListOf()),
         )
 
         val result = useCase(
@@ -76,6 +82,76 @@ class TripUseCasesTest {
         assertThat(endedTrip.endOdometerKm).isEqualTo(10_680)
         assertThat(endedTrip.status).isEqualTo(TripStatus.COMPLETED)
         assertThat(endedTrip.endLocation).isEqualTo("Cabin")
+    }
+
+    @Test
+    fun startAndEndTripBreak_recordsBreakForActiveTrip() = runTest {
+        val carRepository = FakeTripCarRepository(testCar())
+        val tripRepository = FakeTripRepository(
+            trips = mutableListOf(
+                testTrip(id = 9, status = TripStatus.ACTIVE, startOdometerKm = 10_500, endOdometerKm = null),
+            ),
+        )
+        val tripBreakRepository = FakeTripBreakRepository(mutableListOf())
+        val validationService = TripBreakValidationService()
+        val startBreakUseCase = StartTripBreakUseCase(
+            carRepository = carRepository,
+            tripRepository = tripRepository,
+            tripBreakRepository = tripBreakRepository,
+            tripBreakValidationService = validationService,
+        )
+        val endBreakUseCase = EndCurrentTripBreakUseCase(
+            carRepository = carRepository,
+            tripRepository = tripRepository,
+            tripBreakRepository = tripBreakRepository,
+            tripBreakValidationService = validationService,
+        )
+
+        val breakId = startBreakUseCase()
+        val endedBreakId = endBreakUseCase()
+
+        assertThat(breakId).isEqualTo(1L)
+        assertThat(endedBreakId).isEqualTo(1L)
+        val tripBreak = tripBreakRepository.breaks.single()
+        assertThat(tripBreak.tripId).isEqualTo(9L)
+        assertThat(tripBreak.endTimeEpochMillis).isNotNull()
+    }
+
+    @Test
+    fun upsertTripBreak_rejectsOverlappingBreaks() = runTest {
+        val tripRepository = FakeTripRepository(
+            trips = mutableListOf(
+                testTrip(
+                    id = 9,
+                    status = TripStatus.COMPLETED,
+                    startOdometerKm = 10_500,
+                    endOdometerKm = 10_700,
+                ).copy(startTimeEpochMillis = 0L, endTimeEpochMillis = 10_000L),
+            ),
+        )
+        val tripBreakRepository = FakeTripBreakRepository(
+            mutableListOf(
+                testTripBreak(id = 1, tripId = 9, startTimeEpochMillis = 1_000L, endTimeEpochMillis = 2_000L),
+            ),
+        )
+        val useCase = UpsertTripBreakUseCase(
+            tripRepository = tripRepository,
+            tripBreakRepository = tripBreakRepository,
+            tripBreakValidationService = TripBreakValidationService(),
+        )
+
+        val error = runCatching {
+            useCase(
+                tripId = 9,
+                breakId = null,
+                startTimeEpochMillis = 1_500L,
+                endTimeEpochMillis = 3_000L,
+                note = null,
+            )
+        }.exceptionOrNull()
+
+        assertThat(error).isInstanceOf(TripBreakMutationException::class.java)
+        assertThat((error as TripBreakMutationException).error).isEqualTo(TripBreakMutationError.OVERLAPPING_BREAKS)
     }
 }
 
@@ -174,6 +250,47 @@ private class FakeTripRepository(
     }
 }
 
+private class FakeTripBreakRepository(
+    val breaks: MutableList<TripBreak>,
+) : TripBreakRepository {
+    private val state = MutableStateFlow(breaks.toList())
+
+    override fun observeBreaksForTrip(tripId: Long): Flow<List<TripBreak>> =
+        state.asStateFlow()
+
+    override suspend fun getBreaksForTrip(tripId: Long): List<TripBreak> =
+        breaks.filter { it.tripId == tripId }.sortedWith(compareBy<TripBreak> { it.startTimeEpochMillis }.thenBy { it.id })
+
+    override suspend fun getBreak(breakId: Long): TripBreak? =
+        breaks.firstOrNull { it.id == breakId }
+
+    override suspend fun getActiveBreakForTrip(tripId: Long): TripBreak? =
+        breaks.firstOrNull { it.tripId == tripId && it.endTimeEpochMillis == null }
+
+    override suspend fun upsertBreak(tripBreak: TripBreak): Long {
+        return if (tripBreak.id == 0L) {
+            val assignedId = (breaks.maxOfOrNull { it.id } ?: 0L) + 1L
+            breaks += tripBreak.copy(id = assignedId)
+            state.value = breaks.toList()
+            assignedId
+        } else {
+            val index = breaks.indexOfFirst { it.id == tripBreak.id }
+            if (index >= 0) {
+                breaks[index] = tripBreak
+            } else {
+                breaks += tripBreak
+            }
+            state.value = breaks.toList()
+            tripBreak.id
+        }
+    }
+
+    override suspend fun deleteBreak(breakId: Long) {
+        breaks.removeAll { it.id == breakId }
+        state.value = breaks.toList()
+    }
+}
+
 private fun testCar() = Car(
     id = 1,
     name = "Test car",
@@ -221,4 +338,19 @@ private fun testTrip(
     status = status,
     createdAtEpochMillis = id,
     updatedAtEpochMillis = id,
+)
+
+private fun testTripBreak(
+    id: Long,
+    tripId: Long,
+    startTimeEpochMillis: Long,
+    endTimeEpochMillis: Long?,
+) = TripBreak(
+    id = id,
+    tripId = tripId,
+    startTimeEpochMillis = startTimeEpochMillis,
+    endTimeEpochMillis = endTimeEpochMillis,
+    note = null,
+    createdAtEpochMillis = startTimeEpochMillis,
+    updatedAtEpochMillis = endTimeEpochMillis ?: startTimeEpochMillis,
 )

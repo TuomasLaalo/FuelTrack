@@ -187,6 +187,7 @@ These do not need to be stored directly in version 1:
 
 - `FuelStats`
 - `TripSummary`
+- `TripTimelineItem`
 - `ConsumptionSegment`
 
 Additional helpful domain models:
@@ -213,18 +214,21 @@ Room tables:
 - `cars`
 - `fuel_entries`
 - `trips`
+- `trip_breaks`
 
 Relationships:
 
 - one car to many fuel entries
 - one car to many trips
 - one trip to many fuel entries
+- one trip to many trip breaks
 
 Indexes to add:
 
 - `fuel_entries(carId, dateTimeEpochMillis)`
 - `fuel_entries(tripId)`
 - `trips(carId, startTimeEpochMillis)`
+- `trip_breaks(tripId, startTimeEpochMillis)`
 
 Schema discipline from the beginning:
 
@@ -339,9 +343,15 @@ Trip summary in version 1 should be based primarily on actual fuel entries linke
 Recommended MVP rules:
 
 - `tripDistance = endOdometer - startOdometer`
+- `totalElapsedTime = effectiveEndTime - startTime`
+- `totalBreakTime = sum of completed or active trip break durations`
+- `drivingTime = totalElapsedTime - totalBreakTime`
+- `averageSpeedIncludingBreaks = tripDistance / totalElapsedHours`
+- `averageSpeedExcludingBreaks = tripDistance / drivingHours`
 - `tripFuelCost = sum of fuel entries linked to the trip`
 - `tripFuelBought = sum of liters linked to the trip`
 - `tripAverageConsumption` is shown only when enough reliable data exists
+- `tripTimeline` should include trip start, trip breaks, linked fuel entries, and trip end sorted chronologically
 
 If reliable trip consumption cannot be calculated, show a clear message such as:
 

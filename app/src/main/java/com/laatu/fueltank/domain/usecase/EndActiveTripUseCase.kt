@@ -3,12 +3,14 @@ package com.laatu.fueltank.domain.usecase
 import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.domain.model.TripStatus
 import com.laatu.fueltank.domain.repository.CarRepository
+import com.laatu.fueltank.domain.repository.TripBreakRepository
 import com.laatu.fueltank.domain.repository.TripRepository
 import javax.inject.Inject
 
 class EndActiveTripUseCase @Inject constructor(
     private val carRepository: CarRepository,
     private val tripRepository: TripRepository,
+    private val tripBreakRepository: TripBreakRepository,
 ) {
     suspend operator fun invoke(
         distanceInputMode: DistanceInputMode,
@@ -28,6 +30,14 @@ class EndActiveTripUseCase @Inject constructor(
         }
 
         val now = System.currentTimeMillis()
+        tripBreakRepository.getActiveBreakForTrip(activeTrip.id)?.let { activeBreak ->
+            tripBreakRepository.upsertBreak(
+                activeBreak.copy(
+                    endTimeEpochMillis = now,
+                    updatedAtEpochMillis = now,
+                ),
+            )
+        }
         return tripRepository.upsertTrip(
             activeTrip.copy(
                 endLocation = endLocation?.trim().orEmpty().ifBlank { null },

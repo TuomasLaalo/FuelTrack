@@ -2,6 +2,7 @@ package com.laatu.fueltank.core.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -28,7 +29,7 @@ fun FormField(
     filledSupportingColor: Color? = null,
     filledCursorColor: Color? = null,
     singleLine: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
     supportingText: String? = null,
 ) {
     val labelContent: @Composable () -> Unit = { Text(text = label) }

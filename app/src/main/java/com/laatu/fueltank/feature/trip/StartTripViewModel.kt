@@ -74,6 +74,16 @@ class StartTripViewModel @Inject constructor(
     fun onStartLocationChange(value: String) = formState.update { it.copy(startLocation = value, errorMessage = null) }
 
     fun submit() {
+        if (formState.value.startLocation.isBlank()) {
+            formState.update {
+                it.copy(
+                    isSaving = false,
+                    errorMessage = stringResourceProvider.get(R.string.start_trip_error_start_location),
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
             formState.update { it.copy(isSaving = true, errorMessage = null) }
             try {

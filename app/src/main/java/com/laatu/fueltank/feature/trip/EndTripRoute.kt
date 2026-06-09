@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.laatu.fueltank.R
+import com.laatu.fueltank.core.ui.UiTestTags
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.core.ui.component.ConfirmationDialog
 import com.laatu.fueltank.domain.model.DistanceInputMode
@@ -86,6 +88,7 @@ fun EndTripRoute(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 560.dp)
+                .testTag(UiTestTags.EndTripSheet)
                 .background(
                     color = Color.Transparent,
                     shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
@@ -218,6 +221,7 @@ private fun EndTripSheet(
                     onValueChange = onTripMeterChange,
                     label = stringResource(R.string.fuel_entry_trip_meter_km),
                     placeholder = stringResource(R.string.end_trip_trip_meter_placeholder),
+                    modifier = Modifier.testTag(UiTestTags.EndTripTripMeter),
                     filled = true,
                     isError = uiState.tripMeterError != null,
                     filledContainerColor = modalColors.fieldSurface,
@@ -236,6 +240,7 @@ private fun EndTripSheet(
                 onValueChange = onEndLocationChange,
                 label = stringResource(R.string.end_trip_location_label),
                 placeholder = stringResource(R.string.end_trip_location_placeholder),
+                modifier = Modifier.testTag(UiTestTags.EndTripLocation),
                 filled = true,
                 filledContainerColor = modalColors.fieldSurface,
                 filledTextColor = modalColors.primaryText,
@@ -392,6 +397,7 @@ private fun EndTripPrimaryButton(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(UiTestTags.EndTripSave)
             .clip(RoundedCornerShape(18.dp))
             .background(gradient),
         colors = ButtonDefaults.buttonColors(

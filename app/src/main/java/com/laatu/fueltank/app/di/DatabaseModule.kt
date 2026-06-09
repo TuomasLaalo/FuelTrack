@@ -5,12 +5,15 @@ import androidx.room.Room
 import com.laatu.fueltank.data.local.FuelTankDatabase
 import com.laatu.fueltank.data.local.dao.CarDao
 import com.laatu.fueltank.data.local.dao.FuelEntryDao
+import com.laatu.fueltank.data.local.dao.TripBreakDao
 import com.laatu.fueltank.data.local.dao.TripDao
 import com.laatu.fueltank.data.repository.OfflineCarRepository
 import com.laatu.fueltank.data.repository.OfflineFuelEntryRepository
+import com.laatu.fueltank.data.repository.OfflineTripBreakRepository
 import com.laatu.fueltank.data.repository.OfflineTripRepository
 import com.laatu.fueltank.domain.repository.CarRepository
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
+import com.laatu.fueltank.domain.repository.TripBreakRepository
 import com.laatu.fueltank.domain.repository.TripRepository
 import dagger.Binds
 import dagger.Module
@@ -31,7 +34,7 @@ object DatabaseModule {
             FuelTankDatabase::class.java,
             "fuel_tank.db",
         )
-            .addMigrations(FuelTankDatabase.MIGRATION_1_2)
+            .addMigrations(FuelTankDatabase.MIGRATION_1_2, FuelTankDatabase.MIGRATION_2_3)
             .build()
 
     @Provides
@@ -42,6 +45,9 @@ object DatabaseModule {
 
     @Provides
     fun provideTripDao(database: FuelTankDatabase): TripDao = database.tripDao()
+
+    @Provides
+    fun provideTripBreakDao(database: FuelTankDatabase): TripBreakDao = database.tripBreakDao()
 }
 
 @Module
@@ -55,4 +61,7 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindTripRepository(repository: OfflineTripRepository): TripRepository
+
+    @Binds
+    abstract fun bindTripBreakRepository(repository: OfflineTripBreakRepository): TripBreakRepository
 }

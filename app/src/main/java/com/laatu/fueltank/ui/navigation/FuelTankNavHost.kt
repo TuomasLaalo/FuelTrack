@@ -164,9 +164,6 @@ fun FuelTankNavHost(
                 onEndTripClick = {
                     navController.navigate(FuelTankDestination.EndTrip.route)
                 },
-                onTripsClick = {
-                    navController.navigate(FuelTankDestination.Trips.route)
-                },
             )
         }
     }

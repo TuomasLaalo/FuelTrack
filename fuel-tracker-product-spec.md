@@ -116,7 +116,10 @@ After ending a trip, the app should show:
 
 - trip start and end points as names entered by the user
 - start and end odometer
+- start and end time
 - kilometers driven
+- total elapsed time, break time, and driving time
+- a simple timeline of trip start, breaks, linked fuel entries, and trip end
 - fuel bought during the trip
 - total fuel cost during the trip
 - average consumption for the trip when calculation is reliable
@@ -148,6 +151,8 @@ Fuel entries created during a trip must also appear in the normal fuel history.
 - Only one trip can be active at a time.
 - The user must be able to end the active trip.
 - The app must store trip summaries for later viewing.
+- The app must support manually recording and correcting trip breaks.
+- Trip summaries should show elapsed time, break time, driving time, and average speed when distance and valid time are available.
 
 ### 7.4 Calculations
 
@@ -207,6 +212,16 @@ Fuel entries created during a trip must also appear in the normal fuel history.
 - start time
 - end time nullable until trip ends
 - status active/completed
+- created at
+- updated at
+
+### 8.4 Trip Break
+
+- id
+- trip id
+- start time
+- end time nullable while the break is active
+- note nullable
 - created at
 - updated at
 

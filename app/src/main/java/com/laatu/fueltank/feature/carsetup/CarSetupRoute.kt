@@ -28,11 +28,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.res.stringResource
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.ui.UiTestTags
 import com.laatu.fueltank.core.ui.component.AppScaffold
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.ui.theme.Forest
@@ -107,19 +111,20 @@ private fun CarSetupScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 Text(
-                    text = "Vehicle details",
+                    text = stringResource(R.string.car_setup_vehicle_details),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
                 )
 
-                FormField(
-                    value = uiState.name,
-                    onValueChange = onNameChange,
-                    label = "Car name",
-                    placeholder = "Golf, Corolla, A4...",
-                    filled = true,
-                    isError = uiState.nameError != null,
+                    FormField(
+                        value = uiState.name,
+                        onValueChange = onNameChange,
+                        label = stringResource(R.string.car_setup_car_name),
+                        placeholder = stringResource(R.string.car_setup_car_name_placeholder),
+                        modifier = Modifier.testTag(UiTestTags.CarSetupName),
+                        filled = true,
+                        isError = uiState.nameError != null,
                     filledContainerColor = fieldSurface,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     supportingText = uiState.nameError,
@@ -132,9 +137,11 @@ private fun CarSetupScreen(
                     FormField(
                         value = uiState.tankSizeLiters,
                         onValueChange = onTankSizeChange,
-                        label = "Tank size (L)",
-                        placeholder = "55",
-                        modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.car_setup_tank_size),
+                        placeholder = stringResource(R.string.car_setup_tank_size_placeholder),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(UiTestTags.CarSetupTankSize),
                         filled = true,
                         isError = uiState.tankSizeError != null,
                         filledContainerColor = fieldSurface,
@@ -144,9 +151,11 @@ private fun CarSetupScreen(
                     FormField(
                         value = uiState.initialOdometerKm,
                         onValueChange = onInitialOdometerChange,
-                        label = "Odometer (km)",
-                        placeholder = "128500",
-                        modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.car_setup_odometer),
+                        placeholder = stringResource(R.string.car_setup_odometer_placeholder),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag(UiTestTags.CarSetupInitialOdometer),
                         filled = true,
                         isError = uiState.odometerError != null,
                         filledContainerColor = fieldSurface,
@@ -158,7 +167,11 @@ private fun CarSetupScreen(
         }
 
         CarSetupPrimaryButton(
-            text = if (uiState.isSaving) "Saving..." else "Save car",
+            text = if (uiState.isSaving) {
+                stringResource(R.string.car_setup_saving)
+            } else {
+                stringResource(R.string.car_setup_save)
+            },
             isSaving = uiState.isSaving,
             onClick = onSaveClick,
         )
@@ -174,13 +187,13 @@ private fun CarSetupHeader() {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            text = "Create Your Car",
+            text = stringResource(R.string.car_setup_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold,
         )
         Text(
-            text = "Set up the car before logging fuel entries or trips.",
+            text = stringResource(R.string.car_setup_subtitle),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -201,13 +214,13 @@ private fun CarSetupIntroCard() {
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = "Getting started",
+                text = stringResource(R.string.car_setup_getting_started),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "FuelTrack uses your car details as the baseline for fuel history, trip tracking, and odometer normalization.",
+                text = stringResource(R.string.car_setup_intro),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -229,6 +242,7 @@ private fun CarSetupPrimaryButton(
         enabled = !isSaving,
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(UiTestTags.CarSetupSave)
             .clip(RoundedCornerShape(18.dp))
             .background(gradient),
         shape = RoundedCornerShape(18.dp),

@@ -9,6 +9,7 @@ import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.domain.repository.FuelEntryRepository
 import com.laatu.fueltank.domain.service.FuelEntryMutationError
 import com.laatu.fueltank.domain.service.FuelEntryMutationException
+import com.laatu.fueltank.domain.usecase.DeleteFuelEntryUseCase
 import com.laatu.fueltank.domain.usecase.ObservePrimaryCarUseCase
 import com.laatu.fueltank.domain.usecase.UpdateFuelEntryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,30 +37,34 @@ class EditFuelEntryViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     observePrimaryCarUseCase: ObservePrimaryCarUseCase,
     fuelEntryRepository: FuelEntryRepository,
+    private val deleteFuelEntryUseCase: DeleteFuelEntryUseCase,
     private val updateFuelEntryUseCase: UpdateFuelEntryUseCase,
     private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
     private val entryId: Long = checkNotNull(savedStateHandle["entryId"])
     private val formState = MutableStateFlow(AddFuelEntryFormState())
     private val isInitialized = MutableStateFlow(false)
+    private val showDeleteDialog = MutableStateFlow(false)
 
     val uiState: StateFlow<EditFuelEntryUiState> = observePrimaryCarUseCase()
         .flatMapLatest { car ->
             if (car == null) {
-                combine(formState, flowOf(false)) { form, _ ->
+                combine(formState, showDeleteDialog, flowOf(false)) { form, deleteDialogVisible, _ ->
                     EditFuelEntryUiState(
                         formUiState = AddFuelEntryUiState(
                             form = form,
                             computedTotalPriceLabel = form.toComputedTotalPriceLabel(stringResourceProvider),
                         ),
+                        showDeleteDialog = deleteDialogVisible,
                     )
                 }
             } else {
                 combine(
                     formState,
                     isInitialized,
+                    showDeleteDialog,
                     fuelEntryRepository.observeEntriesForCar(car.id),
-                ) { form, initialized, entries ->
+                ) { form, initialized, deleteDialogVisible, entries ->
                     val chronologicalEntries = entries.sortedChronologically()
                     val target = chronologicalEntries.firstOrNull { it.id == entryId }
 
@@ -84,6 +89,7 @@ class EditFuelEntryViewModel @Inject constructor(
                             computedTotalPriceLabel = effectiveForm.toComputedTotalPriceLabel(stringResourceProvider),
                         ),
                         canEdit = target != null,
+                        showDeleteDialog = deleteDialogVisible,
                     )
                 }
             }
@@ -108,6 +114,36 @@ class EditFuelEntryViewModel @Inject constructor(
     fun onStationBrandChange(value: String) = formState.updateField { copy(stationBrand = value) }
     fun onNoteChange(value: String) = formState.updateField { copy(note = value) }
     fun onFullTankChange(value: Boolean) = formState.updateField { copy(isFullTank = value) }
+
+    fun requestDelete() {
+        if (uiState.value.canEdit) {
+            showDeleteDialog.value = true
+        }
+    }
+
+    fun dismissDeleteDialog() {
+        showDeleteDialog.value = false
+    }
+
+    fun confirmDelete() {
+        if (!uiState.value.canEdit) return
+        viewModelScope.launch {
+            formState.updateField { copy(isSaving = true, generalError = null) }
+            try {
+                deleteFuelEntryUseCase(entryId)
+                showDeleteDialog.value = false
+                events.send(EditFuelEntryEvent.EntryDeleted)
+            } catch (error: FuelEntryMutationException) {
+                formState.updateField {
+                    copy(
+                        isSaving = false,
+                        generalError = error.toUiMessage(stringResourceProvider),
+                    )
+                }
+                showDeleteDialog.value = false
+            }
+        }
+    }
 
     fun submit() {
         val state = uiState.value
@@ -210,10 +246,12 @@ data class EditFuelEntryUiState(
     val isLoading: Boolean = false,
     val formUiState: AddFuelEntryUiState = AddFuelEntryUiState(),
     val canEdit: Boolean = false,
+    val showDeleteDialog: Boolean = false,
 )
 
 sealed interface EditFuelEntryEvent {
     data object EntryUpdated : EditFuelEntryEvent
+    data object EntryDeleted : EditFuelEntryEvent
 }
 
 private sealed interface EditFuelEntryValidationResult {

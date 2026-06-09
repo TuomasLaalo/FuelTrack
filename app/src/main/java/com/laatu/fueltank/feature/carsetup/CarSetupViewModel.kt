@@ -2,6 +2,8 @@ package com.laatu.fueltank.feature.carsetup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.laatu.fueltank.R
+import com.laatu.fueltank.core.localization.StringResourceProvider
 import com.laatu.fueltank.domain.usecase.CreateCarUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class CarSetupViewModel @Inject constructor(
     private val createCarUseCase: CreateCarUseCase,
+    private val stringResourceProvider: StringResourceProvider,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(CarSetupUiState())
     val uiState: StateFlow<CarSetupUiState> = _uiState.asStateFlow()
@@ -64,19 +67,19 @@ class CarSetupViewModel @Inject constructor(
 
         if (state.name.trim().isEmpty()) {
             hasError = true
-            nameError = "Enter a car name"
+            nameError = stringResourceProvider.get(R.string.car_setup_error_car_name)
         }
 
         val tankSize = state.tankSizeLiters.toDoubleOrNull()
         if (tankSize == null || tankSize <= 0) {
             hasError = true
-            tankSizeError = "Enter tank size in liters"
+            tankSizeError = stringResourceProvider.get(R.string.car_setup_error_tank_size)
         }
 
         val odometer = state.initialOdometerKm.toLongOrNull()
         if (odometer == null || odometer < 0) {
             hasError = true
-            odometerError = "Enter initial odometer"
+            odometerError = stringResourceProvider.get(R.string.car_setup_error_odometer)
         }
 
         return if (hasError) {

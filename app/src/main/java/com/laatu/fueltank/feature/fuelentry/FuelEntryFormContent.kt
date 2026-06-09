@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,11 +40,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.laatu.fueltank.R
+import com.laatu.fueltank.core.ui.UiTestTags
 import com.laatu.fueltank.core.ui.component.FormField
 import com.laatu.fueltank.domain.model.DistanceInputMode
 import com.laatu.fueltank.ui.theme.Forest
@@ -57,6 +62,7 @@ fun FuelEntryFormContent(
     subtitle: String,
     saveLabel: String,
     discardLabel: String? = null,
+    deleteLabel: String? = null,
     modifier: Modifier = Modifier,
     showTripAttachment: Boolean = false,
     modalStyle: Boolean = false,
@@ -71,6 +77,7 @@ fun FuelEntryFormContent(
     onAttachToActiveTripChange: (Boolean) -> Unit = {},
     onCancelClick: (() -> Unit)? = null,
     onDiscardClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null,
     onSaveClick: () -> Unit,
 ) {
     val spacing = LocalFuelTankSpacing.current
@@ -118,6 +125,7 @@ fun FuelEntryFormContent(
                     onValueChange = onTripMeterChange,
                     label = stringResource(R.string.fuel_entry_trip_meter_km),
                     placeholder = stringResource(R.string.fuel_entry_trip_meter_placeholder),
+                    modifier = Modifier.testTag(UiTestTags.FuelEntryTripMeter),
                     filled = true,
                     isError = uiState.form.tripMeterError != null,
                     filledContainerColor = modalColors.fieldSurface,
@@ -145,6 +153,7 @@ fun FuelEntryFormContent(
                     onValueChange = onOdometerChange,
                     label = stringResource(R.string.fuel_entry_odometer_km),
                     placeholder = stringResource(R.string.fuel_entry_odometer_placeholder),
+                    modifier = Modifier.testTag(UiTestTags.FuelEntryOdometer),
                     filled = true,
                     isError = uiState.form.odometerError != null,
                     filledContainerColor = modalColors.fieldSurface,
@@ -178,6 +187,7 @@ fun FuelEntryFormContent(
                 onValueChange = onStationBrandChange,
                 label = stringResource(R.string.fuel_entry_station),
                 placeholder = stringResource(R.string.fuel_entry_station_placeholder),
+                modifier = Modifier.testTag(UiTestTags.FuelEntryStation),
                 filled = true,
                 filledContainerColor = modalColors.fieldSurface,
                 filledTextColor = modalColors.primaryText,
@@ -264,6 +274,22 @@ fun FuelEntryFormContent(
                 onClick = onSaveClick,
             )
 
+            deleteLabel?.let { label ->
+                TextButton(
+                    onClick = { onDeleteClick?.invoke() },
+                    enabled = onDeleteClick != null && !uiState.form.isSaving,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .testTag(UiTestTags.FuelEntryDelete),
+                ) {
+                    Text(
+                        text = label,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+
             discardLabel?.let { label ->
                 Text(
                     text = label,
@@ -291,10 +317,13 @@ private fun FuelEntryHeader(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
@@ -318,8 +347,10 @@ private fun FuelEntryHeader(
                 color = secondaryText,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
+                    .widthIn(min = 64.dp)
                     .clickable(onClick = onCancelClick)
                     .padding(top = 4.dp),
+                textAlign = TextAlign.End,
             )
         }
     }
@@ -428,7 +459,9 @@ private fun CompactPurchaseCard(
                 onValueChange = onPricePerUnitChange,
                 label = stringResource(R.string.fuel_entry_price_per_unit),
                 placeholder = "1.85",
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag(UiTestTags.FuelEntryPricePerUnit),
                 filled = true,
                 isError = pricePerUnitError != null,
                 filledContainerColor = fieldSurface,
@@ -445,7 +478,9 @@ private fun CompactPurchaseCard(
                 onValueChange = onQuantityChange,
                 label = stringResource(R.string.fuel_entry_quantity),
                 placeholder = "42.5",
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag(UiTestTags.FuelEntryQuantity),
                 filled = true,
                 isError = quantityError != null,
                 filledContainerColor = fieldSurface,
@@ -542,6 +577,7 @@ private fun GradientPrimaryButton(
         enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
+            .testTag(UiTestTags.FuelEntrySave)
             .clip(RoundedCornerShape(18.dp))
             .background(gradient),
         colors = ButtonDefaults.buttonColors(
