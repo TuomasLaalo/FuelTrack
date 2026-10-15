@@ -1,117 +1,58 @@
 # FuelTrack
 
-FuelTrack is an Android app for tracking fuel purchases, fuel costs, and trip-specific refuels for a single car.
+**A local-first Android app for tracking fuel expenses, consumption and trips for one car.**
 
-The project is built as a local-first Android application with emphasis on:
+Built with Kotlin and Jetpack Compose, FuelTrack focuses on dependable calculations, clear handling of incomplete data and a straightforward mobile experience.
 
-- clean data modeling
-- reliable fuel and trip calculations
-- explicit handling of uncertain data
-- practical mobile UX
-- maintainable architecture
+**Status:** Active personal project
 
-## Status
+## Features
 
-This is an active personal project.
+- Record and edit fuel purchases, including odometer or trip-meter readings
+- Review fuel history, costs and consumption
+- Start and end trips, record refuels during a trip and review trip history
+- View a dashboard and choose the app language
 
-Current implemented areas include:
+<!-- Add 2–3 real app screenshots here when available. Suggested: dashboard, fuel entry, trip view. -->
 
-- car setup
-- dashboard
-- add fuel entry modal
-- edit fuel entry
-- fuel history
-- trip start and trip end
-- active trip workspace
-- trip history
-- app language selection
+## Technical highlights
 
-## Why This Project Is Interesting
+- **Consistent mileage history.** Trip-meter readings are normalized to odometer values, and edits to older entries recalculate dependent readings.
+- **Meaningful consumption figures.** Fuel and cost totals are kept separate from consumption estimates, which use completed full-tank segments rather than misleading partial data.
+- **Predictable data and calculations.** Money is stored as cents, fuel as milliliters and unit prices as micros; business rules stay outside the UI layer.
 
-FuelTrack is not just a CRUD app with a few screens. The core engineering work is in:
+## Built with
 
-- supporting both odometer and trip-meter input while storing a normalized odometer history
-- separating all-entry totals from reliable full-tank consumption metrics
-- protecting historical edits and deletes by recalculating dependent trip-meter-based entries
-- keeping calculation logic in domain services instead of UI code
-- presenting uncertain values honestly instead of implying false precision
+Kotlin · Jetpack Compose · Navigation Compose · Hilt · Room · Coroutines & Flow
 
-## Stack
+The app separates **UI** (screens and state), **domain** (validation and calculations) and **data** (Room, repositories and mapping) responsibilities.
 
-- Kotlin
-- Jetpack Compose
-- Navigation Compose
-- Hilt
-- Room
-- Coroutines and Flow
+## Getting started
 
-## Architecture
+Open the project in **Android Studio** with the Android SDK and JDK 21 (or a compatible bundled JDK), then run the app on an emulator or Android device.
 
-The app is structured into:
+From the repository root:
 
-- UI layer for screens, input handling, and state rendering
-- Domain layer for validation, calculations, and trip/fuel rules
-- Data layer for Room entities, DAOs, repositories, and mappings
+```bash
+# macOS / Linux
+./gradlew assembleDebug
+./gradlew testDebugUnitTest
+```
 
-Important implementation choices:
-
-- money is stored as cents
-- fuel is stored as milliliters
-- price per unit is stored as micros
-- trip-meter input is normalized into a stored odometer value
-- reliable consumption is calculated only from completed full-tank segments
-
-## Repository Layout
-
-```text
-FuelTrack/
-  app/                             Android application source
-  design/                          UI references and design notes
-  gradle/                          Gradle wrapper files
-  fuel-tracker-product-spec.md
-  fuel-tracker-architecture-plan.md
-  fuel-tracker-test-plan.md
-  fuel-tracker-review-checklist.md
-  fuel-tracker-done.md
-  FuelTrack-presentation.md
+```powershell
+# Windows
+.\gradlew.bat assembleDebug
+.\gradlew.bat testDebugUnitTest
 ```
 
 ## Documentation
 
-Key project documents:
-
-- `fuel-tracker-product-spec.md`
-- `fuel-tracker-architecture-plan.md`
-- `fuel-tracker-test-plan.md`
-- `fuel-tracker-review-checklist.md`
-- `FuelTrack-presentation.md`
-
-## Local Development
-
-Requirements:
-
-- Android Studio
-- Android SDK
-- JDK 21, or the JDK bundled with Android Studio
-
-Build from terminal:
-
-```powershell
-cd D:\FuelTank
-$env:JAVA_HOME='D:\Ohjelmat\Android\jbr'
-$env:GRADLE_USER_HOME='D:\FuelTank\.gradle-user-home'
-.\gradlew.bat assembleDebug
-```
-
-Run unit tests:
-
-```powershell
-cd D:\FuelTank
-$env:JAVA_HOME='D:\Ohjelmat\Android\jbr'
-$env:GRADLE_USER_HOME='D:\FuelTank\.gradle-user-home'
-.\gradlew.bat testDebugUnitTest
-```
+- [Product specification](fuel-tracker-product-spec.md)
+- [Architecture plan](fuel-tracker-architecture-plan.md)
+- [Test plan](fuel-tracker-test-plan.md)
+- [Review checklist](fuel-tracker-review-checklist.md)
+- [Project presentation](FuelTrack-presentation.md)
 
 ## License
 
-MIT
+[MIT](LICENSE)
